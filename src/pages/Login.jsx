@@ -20,7 +20,7 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-blue-100 px-4">
+    <div className="flex items-center justify-center min-h-screen px-4">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <h2 className="text-3xl font-extrabold text-center mb-2 text-gray-800">
           Welcome Back
@@ -32,7 +32,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
-            <label className="block mb-1 font-semibold text-gray-700">
+            <label className="block mb-1 font-semibold text-gray-400">
               Email Address
             </label>
 
@@ -60,7 +60,7 @@ const Login = () => {
 
           {/* Password Field */}
           <div>
-            <label className="block mb-1 font-semibold text-gray-700">
+            <label className="block mb-1 font-semibold text-gray-400">
               Password
             </label>
 
@@ -95,7 +95,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition"
+            className="w-full bg-gray-400 hover:bg-gray-500 text-white py-2.5 rounded-lg font-semibold transition"
           >
             Login
           </button>

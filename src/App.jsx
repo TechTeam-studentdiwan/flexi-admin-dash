@@ -9,15 +9,17 @@ import Dummy2 from "./pages/Dummy2";
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/dummy1" element={<Dummy1 />} />
-        <Route path="/dummy2" element={<Dummy2 />} />
-      </Routes>
-    </BrowserRouter>
+    <div className="bg-primary">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/dummy1" element={<Dummy1 />} />
+          <Route path="/dummy2" element={<Dummy2 />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 };
 
