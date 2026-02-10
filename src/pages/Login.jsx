@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,8 +20,8 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="flex items-center justify-center min-h-screen px-4 bg-purple-50">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md ">
         <h2 className="text-3xl font-extrabold text-center mb-2 text-gray-800">
           Welcome Back
         </h2>
@@ -32,13 +32,13 @@ const Login = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
-            <label className="block mb-1 font-semibold text-gray-400">
+            <label className="block mb-1 font-semibold text-sm text-gray-700">
               Email Address
             </label>
 
             <div className="relative">
               <input
-                className="w-full border border-gray-300 p-2  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                className="w-full border border-purple-300 p-2 rounded-lg focus:outline-none  transition"
                 type="email"
                 placeholder="Enter email"
                 {...register("email", {
@@ -57,16 +57,14 @@ const Login = () => {
               </p>
             )}
           </div>
-
-          {/* Password Field */}
           <div>
-            <label className="block mb-1 font-semibold text-gray-400">
+            <label className="block mb-1 font-semibold text-sm text-gray-700">
               Password
             </label>
 
             <div className="relative">
               <input
-                className="w-full border border-gray-300 p-2  pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                className="w-full border border-purple-300 p-2 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter password"
                 {...register("password", {
@@ -79,7 +77,7 @@ const Login = () => {
               />
 
               <div
-                className="absolute right-3 top-3 cursor-pointer text-gray-500"
+                className="absolute right-3 top-3 cursor-pointer text-purple-500 hover:text-purple-700"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -95,7 +93,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-gray-400 hover:bg-gray-500 text-white py-2.5 rounded-lg font-semibold transition"
+            className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2.5 rounded-lg font-semibold transition duration-200 shadow-md hover:shadow-lg"
           >
             Login
           </button>

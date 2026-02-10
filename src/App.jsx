@@ -4,19 +4,25 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Cart from "./pages/Cart";
-import Dummy1 from "./pages/Dummy1";
-import Dummy2 from "./pages/Dummy2";
+import SoldItems from "./pages/SoldItems";
+import Analytics from "./pages/Analytics";
+import Customers from "./pages/Customers";
+import Orders from "./pages/Orders";
+import Profile from "./pages/Profile";
 
 const App = () => {
   return (
-    <div className="bg-primary">
+    <div className="bg-purple-50">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/cart" element={<Cart />} />
-          <Route path="/dummy1" element={<Dummy1 />} />
-          <Route path="/dummy2" element={<Dummy2 />} />
+          <Route path="/sold-items" element={<SoldItems />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/customers" element={<Customers />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </div>
