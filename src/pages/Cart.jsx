@@ -1,132 +1,150 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout";
-import { FaTrash, FaPlus, FaMinus } from "react-icons/fa";
+import { FaTrash, FaEdit, FaPlus } from "react-icons/fa";
 
-const Cart = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Product 1",
-      price: 120,
-      quantity: 2,
-    },
-    {
-      id: 2,
-      name: "Product 2",
-      price: 80,
-      quantity: 1,
-    },
-    {
-      id: 3,
-      name: "Product 3",
-      price: 150,
-      quantity: 3,
-    },
+const Products = () => {
+  const [products, setProducts] = useState([
+    { id: 1, name: "Laptop", price: 1200 },
+    { id: 2, name: "Headphones", price: 150 },
+    { id: 3, name: "Keyboard", price: 80 },
   ]);
 
-  const updateQuantity = (id, type) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity:
-                type === "increase"
-                  ? item.quantity + 1
-                  : item.quantity > 1
-                  ? item.quantity - 1
-                  : 1,
-            }
-          : item
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: "",
+  });
+
+  const [editingId, setEditingId] = useState(null);
+
+  const addProduct = () => {
+    if (!newProduct.name || !newProduct.price) return;
+
+    setProducts([
+      ...products,
+      {
+        id: Date.now(),
+        name: newProduct.name,
+        price: Number(newProduct.price),
+      },
+    ]);
+
+    setNewProduct({ name: "", price: "" });
+  };
+
+  const deleteProduct = (id) => {
+    setProducts(products.filter((product) => product.id !== id));
+  };
+
+  const startEdit = (product) => {
+    setEditingId(product.id);
+    setNewProduct({
+      name: product.name,
+      price: product.price,
+    });
+  };
+
+  const updateProduct = () => {
+    setProducts(
+      products.map((product) =>
+        product.id === editingId
+          ? { ...product, ...newProduct }
+          : product
       )
     );
-  };
 
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter((item) => item.id !== id));
+    setEditingId(null);
+    setNewProduct({ name: "", price: "" });
   };
-
-  const totalAmount = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
 
   return (
     <Layout>
-      <h2 className="text-2xl font-bold mb-4">Cart</h2>
+      <div className="p-4">
+        <h2 className="text-2xl font-bold text-purple-800 mb-6">
+          Product Management
+        </h2>
 
-      {cartItems.length === 0 ? (
-        <p className="text-gray-600">Cart is empty</p>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white shadow rounded-lg p-4 flex items-center justify-between"
-              >
-                <div>
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-gray-500">${item.price}</p>
-                </div>
+        <div className="bg-white shadow rounded-lg p-5 mb-6 ">
+          <h3 className="text-lg font-semibold text-purple-700 mb-4">
+            {editingId ? "Edit Product" : "Add New Product"}
+          </h3>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => updateQuantity(item.id, "decrease")}
-                    className="p-2 bg-gray-100 rounded"
-                  >
-                    <FaMinus />
-                  </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+              type="text"
+              placeholder="Product Name"
+              value={newProduct.name}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, name: e.target.value })
+              }
+              className="border border-purple-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
 
-                  <span className="px-2">{item.quantity}</span>
+            <input
+              type="number"
+              placeholder="Price"
+              value={newProduct.price}
+              onChange={(e) =>
+                setNewProduct({ ...newProduct, price: e.target.value })
+              }
+              className="border border-purple-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
 
-                  <button
-                    onClick={() => updateQuantity(item.id, "increase")}
-                    className="p-2 bg-gray-100 rounded"
-                  >
-                    <FaPlus />
-                  </button>
-                </div>
-
-                <div className="font-bold">
-                  ${item.price * item.quantity}
-                </div>
-
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="bg-white shadow rounded-lg p-5 h-fit">
-            <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
-
-            <div className="flex justify-between mb-2">
-              <span>Subtotal</span>
-              <span>${totalAmount}</span>
-            </div>
-
-            <div className="flex justify-between mb-2">
-              <span>Shipping</span>
-              <span>$10</span>
-            </div>
-
-            <div className="flex justify-between mb-4 font-bold">
-              <span>Total</span>
-              <span>${totalAmount + 10}</span>
-            </div>
-
-            <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-              Checkout
+            <button
+              onClick={editingId ? updateProduct : addProduct}
+              className="bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition flex items-center justify-center gap-2"
+            >
+              <FaPlus />
+              {editingId ? "Update Product" : "Add Product"}
             </button>
           </div>
         </div>
-      )}
+
+        <div className="bg-white shadow rounded-lg p-5">
+          <h3 className="text-lg font-semibold text-purple-700 mb-4">
+            Product List
+          </h3>
+
+          {products.length === 0 ? (
+            <p className="text-purple-600">No products available</p>
+          ) : (
+            <div className="space-y-4">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="flex items-center justify-between bg-purple-50 p-4 rounded-lg border border-purple-200"
+                >
+                  <div>
+                    <h4 className="font-semibold text-purple-800">
+                      {product.name}
+                    </h4>
+                    <p className="text-purple-600">
+                      ${product.price}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => startEdit(product)}
+                      className="bg-purple-100 text-purple-700 p-2 rounded hover:bg-purple-200"
+                    >
+                      <FaEdit />
+                    </button>
+
+                    <button
+                      onClick={() => deleteProduct(product.id)}
+                      className="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 };
 
-export default Cart;
+export default Products;
