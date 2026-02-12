@@ -52,3 +52,24 @@
     @apply max-w-7xl mx-auto p-4;
   }
 }
+
+.input {
+  border: 1px solid #d8b4fe;
+  padding: 8px;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.btn {
+  background: #7c3aed;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #eee;
+}

@@ -9,7 +9,11 @@ import {
   FaClipboardList,
   FaUserCircle,
   FaSignOutAlt,
+  FaAddressBook,
 } from "react-icons/fa";
+import { BsBag } from "react-icons/bs";
+import { TbRulerMeasure } from "react-icons/tb";
+import { RiCoupon2Fill } from "react-icons/ri";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -21,11 +25,15 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "Dashboard", path: "/dashboard", icon: <FaHome /> },
-    { name: "Products", path: "/cart", icon: <FaBoxOpen /> },
-    { name: "Sold Items", path: "/sold-items", icon: <FaShoppingBag /> },
-    { name: "Analytics", path: "/analytics", icon: <FaChartLine /> },
+    { name: "Products", path: "/products", icon: <FaBoxOpen /> },
+    // { name: "Sold Items", path: "/sold-items", icon: <FaShoppingBag /> },
+    { name: "Orders", path: "/orders", icon: <FaClipboardList /> },
+    { name: "Cart", path: "/cart", icon: <BsBag /> },
+    { name: "Addresses", path: "/addresses", icon: <FaAddressBook /> },
+    { name: "Measurements", path: "/measurements", icon: <TbRulerMeasure /> },
+    { name: "Coupons", path: "/coupons", icon: <RiCoupon2Fill /> },
     { name: "Customers", path: "/customers", icon: <FaUsers /> },
-    { name: "Orders", path: "/orders", icon: <FaClipboardList /> }
+    { name: "Analytics", path: "/analytics", icon: <FaChartLine /> },
   ];
 
   return (
