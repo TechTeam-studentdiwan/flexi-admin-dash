@@ -67,7 +67,7 @@ const SoldItems = () => {
               {soldItems.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-purple-50 border border-purple-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between"
+                  className="bg-white border border-purple-200 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between"
                 >
                   <div>
                     <h4 className="font-semibold text-purple-800">

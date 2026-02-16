@@ -95,7 +95,7 @@ const Orders = () => {
           </h2>
 
           <button
-            className="p-2 bg-purple-400 rounded-md text-white"
+            className="p-2 bg-linear-to-r from-pink-500 to-purple-500 rounded-md text-white"
             onClick={() => navigate("/add/order")}
           >
             Add New
@@ -110,7 +110,7 @@ const Orders = () => {
           {orders.map((order) => (
             <div
               key={order.id}
-              className="bg-purple-50 border border-purple-200 p-4 rounded mb-3"
+              className="bg-white border border-purple-200 p-4 rounded mb-3"
             >
               <div className="flex justify-between items-start">
                 <div>

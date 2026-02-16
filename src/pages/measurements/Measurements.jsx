@@ -98,7 +98,7 @@ const navigate = useNavigate()
           </h2>
 
           <button
-            className="p-2 bg-purple-400 rounded-md text-white"
+            className="p-2 bg-linear-to-r from-pink-500 to-purple-500 rounded-md text-white"
             onClick={() => navigate("/add/measurement")}
           >
             Add New
@@ -119,7 +119,7 @@ const navigate = useNavigate()
               {profiles.map((profile) => (
                 <div
                   key={profile.id}
-                  className="bg-purple-50 p-4 rounded border flex justify-between"
+                  className="bg-white p-4 rounded border flex justify-between"
                 >
                   <div>
                     <h4 className="font-semibold text-purple-800">

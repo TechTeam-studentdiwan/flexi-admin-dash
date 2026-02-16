@@ -23,7 +23,7 @@ import ErrorPage from "./pages/Error";
 
 const App = () => {
   return (
-    <div className="bg-purple-50">
+    <div className="bg-white">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />

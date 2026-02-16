@@ -28,7 +28,7 @@ const Sidebar = () => {
     { name: "Products", path: "/products", icon: <FaBoxOpen /> },
     // { name: "Sold Items", path: "/sold-items", icon: <FaShoppingBag /> },
     { name: "Orders", path: "/orders", icon: <FaClipboardList /> },
-    { name: "Cart", path: "/cart", icon: <BsBag /> },
+    // { name: "Cart", path: "/cart", icon: <BsBag /> },
     { name: "Addresses", path: "/addresses", icon: <FaAddressBook /> },
     { name: "Measurements", path: "/measurements", icon: <TbRulerMeasure /> },
     { name: "Coupons", path: "/coupons", icon: <RiCoupon2Fill /> },
@@ -37,10 +37,10 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-64 h-screen bg-purple-100 border-r border-purple-200 shadow-md flex flex-col justify-between">
+    <aside className="w-64 h-screen border-r border-purple-200 shadow-md flex flex-col justify-between">
       <div>
-        <div className="p-5 border-b border-purple-200 bg-purple-100">
-          <h2 className="text-2xl font-bold text-center text-purple-800">
+        <div className="p-5 border-b border-purple-200 ">
+          <h2 className="text-2xl font-bold text-center">
             Flexi
           </h2>
         </div>
@@ -53,8 +53,8 @@ const Sidebar = () => {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-4 py-2 rounded-md transition-all duration-200 ${
                       isActive
-                        ? "bg-purple-200 text-purple-800 font-semibold"
-                        : "text-purple-700 hover:bg-purple-100"
+                        ? "bg-purple-200 text-purple-600 font-semibold"
+                        : " hover:bg-purple-100"
                     }`
                   }
                 >
@@ -69,14 +69,14 @@ const Sidebar = () => {
       <div className="p-4 border-t border-purple-200 flex items-center gap-3">
         <button
           onClick={() => navigate("/profile")}
-          className="flex items-center justify-center bg-purple-100 text-purple-700 p-2 rounded-md hover:bg-purple-200 transition-all"
+          className="flex items-center justify-center hover:scale-110 p-2 rounded-md  transition-all"
         >
           <FaUserCircle className="text-xl" />
         </button>
 
         <button
           onClick={logout}
-          className="flex-1 flex items-center justify-center gap-2 bg-purple-100 text-purple-700 py-2 rounded-md hover:bg-purple-200 transition-all"
+          className="flex-1 flex items-center justify-center gap-2 bg-red-100 py-2 rounded-md hover:bg-red-200 transition-all"
         >
           <FaSignOutAlt />
           Logout

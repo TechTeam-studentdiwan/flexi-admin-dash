@@ -128,7 +128,7 @@ const Addresses = () => {
           </h2>
 
           <button
-            className="p-2 bg-purple-400 rounded-md text-white"
+            className="p-2 bg-linear-to-r from-pink-500 to-purple-500 rounded-md text-white"
             onClick={() => navigate("/add/address")}
           >
             Add New
@@ -148,7 +148,7 @@ const Addresses = () => {
               {addresses.map((addr) => (
                 <div
                   key={addr.id}
-                  className="flex items-center justify-between bg-purple-50 p-4 rounded-lg border"
+                  className="flex items-center justify-between bg-white p-4 rounded-lg border"
                 >
                   <div>
                     <h4 className="font-semibold text-purple-800">
