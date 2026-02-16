@@ -139,7 +139,7 @@ const Dashboard = () => {
               {orders.map((order) => (
                 <li
                   key={order.id}
-                  className="bg-purple-50 p-3 rounded flex justify-between"
+                  className="bg-white p-3 rounded flex justify-between"
                 >
                   <div>
                     <p className="font-semibold text-purple-800">

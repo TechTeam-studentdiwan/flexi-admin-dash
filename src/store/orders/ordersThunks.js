@@ -1,0 +1,23 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+
+const BASE_URL = "http://localhost:8080/orders"; // change if needed
+
+// 🔹 Get All Orders (Admin)
+export const getAllOrders = createAsyncThunk(
+  "orders/getAllOrders",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/getallorders`, {
+        params, // sends query params automatically
+        withCredentials: true,
+      });
+
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch orders"
+      );
+    }
+  }
+);

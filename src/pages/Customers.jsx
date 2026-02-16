@@ -19,7 +19,7 @@ const Customers = () => {
           {customers.map((customer) => (
             <div
               key={customer.id}
-              className="bg-purple-50 border border-purple-200 p-4 rounded mb-3"
+              className="bg-white border border-purple-200 p-4 rounded mb-3"
             >
               <h3 className="font-semibold text-purple-800">
                 {customer.name}

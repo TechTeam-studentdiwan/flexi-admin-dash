@@ -3,11 +3,13 @@ import Sidebar from "./Sidebar";
 
 const Layout = ({ children }) => {
   return (
-    <div style={{ display: "flex" }}>
+    <div className="min-h-screen ">
       <Sidebar />
-      <div style={{ padding: 20, width: "100%" }}>
+
+      {/* Main Content */}
+      <main className="ml-64 p-6">
         {children}
-      </div>
+      </main>
     </div>
   );
 };

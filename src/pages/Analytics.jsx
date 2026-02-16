@@ -75,7 +75,7 @@ const Analytics = () => {
             {recentSales.map((sale) => (
               <div
                 key={sale.id}
-                className="bg-purple-50 border border-purple-200 p-4 rounded-lg flex justify-between items-center"
+                className="bg-white border border-purple-200 p-4 rounded-lg flex justify-between items-center"
               >
                 <div>
                   <h4 className="font-semibold text-purple-800">

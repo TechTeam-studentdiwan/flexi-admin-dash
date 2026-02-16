@@ -1,203 +1,188 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Layout from "../../components/Layout";
-import { useNavigate } from "react-router-dom";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { getAllOrders } from "../../store/orders/ordersThunks";
+import SideDrawer from "../../components/SideDrawer";
 
 const Orders = () => {
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // Dummy data exactly shaped like your backend Order model
-  const [orders, setOrders] = useState([
-    {
-      id: "ord_1",
-      orderNumber: "ORD123456",
-      userId: "user_1",
-      subtotal: 350,
-      discount: 50,
-      fitAdjustmentFee: 30,
-      deliveryFee: 15,
-      total: 345,
-      paymentStatus: "paid",
-      orderStatus: "processing",
-      couponCode: "RAMADAN15",
-      trackingNumber: "TRK98765",
-      estimatedDelivery: "2024-04-20",
-      createdAt: "2024-04-10",
-      shippingAddress: {
-        fullName: "John Doe",
-        phone: "123456789",
-        city: "Doha",
-        addressLine1: "Street 10, Building 5",
-      },
-      items: [
-        {
-          productId: "prod_1",
-          productName: "Chikankari Kurta Set",
-          size: "M",
-          quantity: 1,
-          price: 249,
-        },
-      ],
-    },
-    {
-      id: "ord_2",
-      orderNumber: "ORD654321",
-      userId: "user_2",
-      subtotal: 200,
-      discount: 0,
-      fitAdjustmentFee: 0,
-      deliveryFee: 0,
-      total: 200,
-      paymentStatus: "pending",
-      orderStatus: "confirmed",
-      couponCode: null,
-      trackingNumber: null,
-      estimatedDelivery: "2024-04-25",
-      createdAt: "2024-04-12",
-      shippingAddress: {
-        fullName: "Alice Smith",
-        phone: "987654321",
-        city: "Doha",
-        addressLine1: "Al Sadd Area",
-      },
-      items: [
-        {
-          productId: "prod_2",
-          productName: "Pakistani Suit",
-          size: "L",
-          quantity: 1,
-          price: 200,
-        },
-      ],
-    },
-  ]);
+  const { orders, loading, pagination } = useSelector((state) => state.orders);
 
-  // ---- ACTION HANDLERS ----
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleEdit = (order) => {
-    console.log("EDIT ORDER:", order);
-    // later you can navigate to edit page
-    // navigate(`/edit/order/${order.id}`)
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 10,
+  });
+
+  useEffect(() => {
+    dispatch(getAllOrders(filters));
+  }, [dispatch, filters]);
+
+  const openDetails = (order) => {
+    setSelectedOrder(order);
+    setIsOpen(true);
   };
 
-  const handleDelete = (id) => {
-    console.log("DELETE ORDER ID:", id);
-
-    setOrders(orders.filter((order) => order.id !== id));
+  const closeDetails = () => {
+    setIsOpen(false);
+    setSelectedOrder(null);
   };
 
   return (
     <Layout>
-      <div className="p-4">
-        <div className="flex justify-between items-baseline">
-          <h2 className="text-2xl font-bold text-purple-800 mb-6">
-            Orders
-          </h2>
+      <div>
+        <h2 className="text-2xl font-bold text-purple-800 mb-6">
+          Orders Management
+        </h2>
 
-          <button
-            className="p-2 bg-purple-400 rounded-md text-white"
-            onClick={() => navigate("/add/order")}
-          >
-            Add New
-          </button>
+        {/* TABLE */}
+        <div className="bg-white shadow rounded-lg overflow-hidden">
+          {loading ? (
+            <div className="p-6 text-center">Loading orders...</div>
+          ) : (
+            <table className="w-full border-collapse">
+              <thead className="bg-gray-100 text-left">
+                <tr>
+                  <th className="p-4 text-sm font-semibold">Customer</th>
+                  <th className="p-4 text-sm font-semibold">Total</th>
+                  <th className="p-4 text-sm font-semibold">Order Status</th>
+                  <th className="p-4 text-sm font-semibold">Payment</th>
+                  <th className="p-4 text-sm font-semibold">Date</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {orders.map((order) => (
+                  <tr
+                    key={order._id}
+                    onClick={() => openDetails(order)}
+                    className="border-t hover:bg-gray-50 cursor-pointer transition"
+                  >
+                    <td className="p-4 font-medium">
+                      {order.shippingAddress?.fullName}
+                      <div className="text-xs text-gray-500">
+                        {order.shippingAddress?.phone}
+                      </div>
+                    </td>
+
+                    <td className="p-4">₹ {order.total}</td>
+
+                    <td className="p-4">
+                      <span className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700">
+                        {order.orderStatus}
+                      </span>
+                    </td>
+
+                    <td className="p-4">
+                      <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
+                        {order.paymentStatus}
+                      </span>
+                    </td>
+
+                    <td className="p-4 text-sm text-gray-500">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
-        <div className="bg-white shadow rounded-lg p-5">
-          {orders.length === 0 && (
-            <p className="text-purple-600">No orders available</p>
-          )}
+        {/* SIDEBAR DETAILS */}
+        {isOpen && selectedOrder && (
+          <SideDrawer
+            isOpen={isOpen}
+            onClose={closeDetails}
+            title="Order Details"
+          >
+            {/* Order Info */}
+            <div className="space-y-3 text-sm">
+              <div>
+                <strong>Order ID:</strong> {selectedOrder._id}
+              </div>
 
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-purple-50 border border-purple-200 p-4 rounded mb-3"
-            >
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-purple-800">
-                    Order #{order.orderNumber}
-                  </h3>
+              <div>
+                <strong>Order Status:</strong> {selectedOrder.orderStatus}
+              </div>
 
-                  <p className="text-purple-600">
-                    Customer: {order.shippingAddress.fullName}
-                  </p>
+              <div>
+                <strong>Payment Status:</strong> {selectedOrder.paymentStatus}
+              </div>
 
-                  <p className="text-purple-600">
-                    Phone: {order.shippingAddress.phone}
-                  </p>
+              <div>
+                <strong>Estimated Delivery:</strong>{" "}
+                {new Date(selectedOrder.estimatedDelivery).toLocaleDateString()}
+              </div>
 
-                  <p className="text-purple-600">
-                    City: {order.shippingAddress.city}
-                  </p>
+              <hr className="my-4" />
 
-                  <p className="text-purple-600">
-                    Subtotal: ${order.subtotal}
-                  </p>
+              {/* Customer */}
+              <h3 className="font-semibold text-purple-700">
+                Customer Details
+              </h3>
 
-                  <p className="text-purple-600">
-                    Discount: ${order.discount}
-                  </p>
+              <div>
+                <strong>Name:</strong> {selectedOrder.shippingAddress.fullName}
+              </div>
 
-                  <p className="text-purple-600">
-                    Delivery Fee: ${order.deliveryFee}
-                  </p>
+              <div>
+                <strong>Phone:</strong> {selectedOrder.shippingAddress.phone}
+              </div>
 
-                  <p className="font-semibold text-purple-800">
-                    Total: ${order.total}
-                  </p>
-
-                  <span className="text-sm text-purple-700 block">
-                    Payment Status: {order.paymentStatus}
-                  </span>
-
-                  <span className="text-sm text-purple-700 block">
-                    Order Status: {order.orderStatus}
-                  </span>
-
-                  {order.couponCode && (
-                    <span className="text-sm text-purple-700 block">
-                      Coupon: {order.couponCode}
-                    </span>
-                  )}
-
-                  <span className="text-sm text-purple-700 block">
-                    Estimated Delivery: {order.estimatedDelivery}
-                  </span>
-
-                  <div className="mt-2">
-                    <h4 className="font-semibold text-purple-800">
-                      Items:
-                    </h4>
-
-                    {order.items.map((item, index) => (
-                      <p key={index} className="text-purple-600 text-sm">
-                        - {item.productName} | Size: {item.size} | Qty:{" "}
-                        {item.quantity}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ACTION BUTTONS */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(order)}
-                    className="bg-purple-100 text-purple-700 p-2 rounded hover:bg-purple-200"
-                  >
-                    <FaEdit />
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(order.id)}
-                    className="bg-red-100 text-red-600 p-2 rounded hover:bg-red-200"
-                  >
-                    <FaTrash />
-                  </button>
+              <div>
+                <strong>Address:</strong>
+                <div className="text-gray-600">
+                  {selectedOrder.shippingAddress.addressLine1}
+                  <br />
+                  {selectedOrder.shippingAddress.addressLine2}
+                  <br />
+                  {selectedOrder.shippingAddress.city},{" "}
+                  {selectedOrder.shippingAddress.state}
+                  <br />
+                  {selectedOrder.shippingAddress.country}
                 </div>
               </div>
+
+              <hr className="my-4" />
+
+              {/* Items */}
+              <h3 className="font-semibold text-purple-700">Ordered Items</h3>
+
+              <div className="space-y-3">
+                {selectedOrder.items.map((item, index) => (
+                  <div key={index} className="border p-3 rounded bg-gray-50">
+                    <div className="font-medium">{item.name}</div>
+                    <div>Size: {item.size}</div>
+                    <div>Qty: {item.quantity}</div>
+                    <div>Price: ₹ {item.discountPrice || item.price}</div>
+                  </div>
+                ))}
+              </div>
+
+              <hr className="my-4" />
+
+              {/* Pricing Breakdown */}
+              <h3 className="font-semibold text-purple-700">Payment Summary</h3>
+
+              <div>Subtotal: ₹ {selectedOrder.subtotal}</div>
+              <div>Discount: ₹ {selectedOrder.discount}</div>
+              <div>Delivery Fee: ₹ {selectedOrder.deliveryFee}</div>
+              <div className="font-bold text-lg">
+                Total: ₹ {selectedOrder.total}
+              </div>
+
+              {selectedOrder.couponCode && (
+                <div>
+                  <strong>Coupon:</strong> {selectedOrder.couponCode}
+                </div>
+              )}
             </div>
-          ))}
-        </div>
+          </SideDrawer>
+        )}
       </div>
     </Layout>
   );

@@ -1,199 +1,242 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Layout from "../../components/Layout";
-import { useForm } from "react-hook-form";
-import { FaTrash, FaEdit, FaPlus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { FaTrash, FaEdit } from "react-icons/fa";
+import {
+  deleteCoupon,
+  getCoupons,
+  updateCoupon,
+} from "../../store/coupons/couponThunks";
+import SideDrawer from "../../components/SideDrawer";
 
 const Coupons = () => {
-  const { register, handleSubmit, reset, setValue } = useForm();
-const navigate = useNavigate()
-  // Backend-shaped dummy coupons
-  const [coupons, setCoupons] = useState([
-    {
-      id: "coupon_1",
-      code: "RAMADAN15",
-      type: "percentage",
-      value: 15,
-      minCartValue: 200,
-      maxDiscount: 50,
-      validFrom: "2024-03-01",
-      validTo: "2024-04-01",
-      usageLimit: 100,
-      usedCount: 10,
-      eligibleCategories: ["Chikankari"],
-      firstOrderOnly: false,
-      isActive: true,
-    },
-  ]);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [editingId, setEditingId] = useState(null);
+  const { coupons, loading } = useSelector((state) => state.coupon);
 
-  // -------- ADD / UPDATE --------
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const onSubmit = (data) => {
-    const formattedCoupon = {
-      id: editingId ? editingId : Date.now().toString(),
-      code: data.code,
-      type: data.type,
-      value: Number(data.value),
-      minCartValue: Number(data.minCartValue),
-      maxDiscount: Number(data.maxDiscount),
-      validFrom: data.validFrom,
-      validTo: data.validTo,
-      usageLimit: Number(data.usageLimit),
-      usedCount: editingId
-        ? coupons.find((c) => c.id === editingId).usedCount
-        : 0,
-      eligibleCategories: data.eligibleCategories
-        ? data.eligibleCategories.split(",")
-        : [],
-      firstOrderOnly: data.firstOrderOnly || false,
-      isActive: data.isActive || false,
-    };
+  useEffect(() => {
+    dispatch(getCoupons());
+  }, [dispatch]);
 
-    if (editingId) {
-      console.log("UPDATE COUPON:", formattedCoupon);
-
-      setCoupons(
-        coupons.map((c) =>
-          c.id === editingId ? formattedCoupon : c
-        )
-      );
-
-      setEditingId(null);
-    } else {
-      console.log("ADD COUPON:", formattedCoupon);
-      setCoupons([...coupons, formattedCoupon]);
+  const handleDelete = async (id) => {
+    if (window.confirm("Delete coupon?")) {
+      await dispatch(deleteCoupon(id));
     }
-
-    reset();
   };
 
-  // -------- EDIT --------
-
-  const startEdit = (coupon) => {
-    setEditingId(coupon.id);
-
-    Object.keys(coupon).forEach((key) => {
-      if (key === "eligibleCategories") {
-        setValue(key, coupon[key].join(","));
-      } else {
-        setValue(key, coupon[key]);
-      }
-    });
-  };
-
-  // -------- DELETE --------
-
-  const deleteCoupon = (id) => {
-    console.log("DELETE COUPON ID:", id);
-    setCoupons(coupons.filter((c) => c.id !== id));
-  };
-
-  const toggleStatus = (id) => {
-    console.log("TOGGLE COUPON STATUS:", id);
-
-    setCoupons(
-      coupons.map((c) =>
-        c.id === id ? { ...c, isActive: !c.isActive } : c
-      )
+  const toggleStatus = async (coupon) => {
+    await dispatch(
+      updateCoupon({
+        id: coupon._id,
+        data: { isActive: !coupon.isActive },
+      })
     );
+  };
+
+  const openDetails = (coupon) => {
+    setSelectedCoupon(coupon);
+    setIsOpen(true);
+  };
+
+  const closeDetails = () => {
+    setSelectedCoupon(null);
+    setIsOpen(false);
   };
 
   return (
     <Layout>
-      <div className="p-6">
-        <div className="flex justify-between items-baseline">
-          <h2 className="text-2xl font-bold text-purple-800 mb-6">
+      <div>
+        {/* Header */}
+        <div className="flex justify-between mb-6">
+          <h2 className="text-2xl font-bold text-purple-800">
             Coupon Management
           </h2>
 
           <button
-            className="p-2 bg-purple-400 rounded-md text-white"
+            className="px-4 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded"
             onClick={() => navigate("/add/coupon")}
           >
             Add New
           </button>
         </div>
-        {/* LIST SECTION */}
-        <div className="bg-white shadow rounded-lg p-5">
-          <h3 className="text-lg font-semibold text-purple-700 mb-4">
-            Existing Coupons
-          </h3>
 
-          {coupons.length === 0 ? (
-            <p>No coupons available</p>
-          ) : (
-            <div className="space-y-4">
-              {coupons.map((coupon) => (
-                <div
-                  key={coupon.id}
-                  className="bg-purple-50 p-4 rounded border flex justify-between"
-                >
-                  <div>
-                    <h4 className="font-semibold text-purple-800">
-                      {coupon.code}{" "}
-                      {!coupon.isActive && (
-                        <span className="text-red-500 text-sm">
-                          (Inactive)
+        {/* Table */}
+        {loading ? (
+          <p>Loading coupons...</p>
+        ) : (
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            {coupons.length === 0 ? (
+              <div className="p-6 text-center text-gray-400">
+                No coupons found.
+              </div>
+            ) : (
+              <table className="w-full text-left">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-4">Code</th>
+                    <th className="p-4">Type</th>
+                    <th className="p-4">Value</th>
+                    <th className="p-4">Valid Till</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {coupons.map((coupon) => (
+                    <tr
+                      key={coupon._id}
+                      onClick={() => openDetails(coupon)}
+                      className="border-t hover:bg-gray-50 cursor-pointer transition"
+                    >
+                      <td className="p-4 font-semibold">{coupon.code}</td>
+
+                      <td className="p-4 capitalize">{coupon.type}</td>
+
+                      <td className="p-4">
+                        {coupon.type === "percentage"
+                          ? `${coupon.value}%`
+                          : `QAR ${coupon.value}`}
+                      </td>
+
+                      <td className="p-4">
+                        {new Date(coupon.validTo).toLocaleDateString()}
+                      </td>
+
+                      <td className="p-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm ${
+                            coupon.isActive
+                              ? "bg-green-100 text-green-600"
+                              : "bg-red-100 text-red-600"
+                          }`}
+                        >
+                          {coupon.isActive ? "Active" : "Inactive"}
                         </span>
-                      )}
-                    </h4>
+                      </td>
 
-                    <p className="text-sm">
-                      Type: {coupon.type} | Value: {coupon.value}
-                    </p>
+                      <td
+                        className="p-4 text-right space-x-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() =>
+                            navigate(`/edit/coupon/${coupon._id}`, {
+                              state: { coupon },
+                            })
+                          }
+                          className="p-2"
+                        >
+                          <FaEdit />
+                        </button>
 
-                    <p className="text-sm">
-                      Min Cart: {coupon.minCartValue} | Max Discount: {coupon.maxDiscount}
-                    </p>
+                        <button
+                          onClick={() => toggleStatus(coupon)}
+                          className="p-2"
+                        >
+                          {coupon.isActive ? "Disable" : "Enable"}
+                        </button>
 
-                    <p className="text-sm">
-                      Valid: {coupon.validFrom} → {coupon.validTo}
-                    </p>
+                        <button
+                          onClick={() => handleDelete(coupon._id)}
+                          className="p-2"
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
 
-                    <p className="text-sm">
-                      Used: {coupon.usedCount}/{coupon.usageLimit}
-                    </p>
+        {/* Sidebar */}
+        {isOpen && selectedCoupon && (
+          <SideDrawer
+            isOpen={isOpen}
+            onClose={closeDetails}
+            title="Coupon Details"
+          >
+            <div className="space-y-4 text-sm">
 
-                    <p className="text-sm">
-                      Categories: {coupon.eligibleCategories.join(", ")}
-                    </p>
+              <div>
+                <strong>Code:</strong> {selectedCoupon.code}
+              </div>
 
-                    {coupon.firstOrderOnly && (
-                      <p className="text-xs text-purple-600">
-                        First Order Only
-                      </p>
-                    )}
-                  </div>
+              <div>
+                <strong>Type:</strong> {selectedCoupon.type}
+              </div>
 
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => toggleStatus(coupon.id)}
-                      className="bg-yellow-100 p-2 rounded"
-                    >
-                      {coupon.isActive ? "Disable" : "Enable"}
-                    </button>
+              <div>
+                <strong>Value:</strong>{" "}
+                {selectedCoupon.type === "percentage"
+                  ? `${selectedCoupon.value}%`
+                  : `QAR ${selectedCoupon.value}`}
+              </div>
 
-                    <button
-                      onClick={() => startEdit(coupon)}
-                      className="bg-purple-100 p-2 rounded"
-                    >
-                      <FaEdit />
-                    </button>
+              <div>
+                <strong>Minimum Cart Value:</strong> QAR {selectedCoupon.minCartValue}
+              </div>
 
-                    <button
-                      onClick={() => deleteCoupon(coupon.id)}
-                      className="bg-red-100 p-2 rounded"
-                    >
-                      <FaTrash />
-                    </button>
-                  </div>
-                </div>
-              ))}
+              <div>
+                <strong>Maximum Discount:</strong>{" "}
+                {selectedCoupon.maxDiscount
+                  ? `QAR ${selectedCoupon.maxDiscount}`
+                  : "No limit"}
+              </div>
+
+              <div>
+                <strong>Usage Limit:</strong> {selectedCoupon.usageLimit}
+              </div>
+
+              <div>
+                <strong>Used Count:</strong> {selectedCoupon.usedCount}
+              </div>
+
+              <div>
+                <strong>Valid From:</strong>{" "}
+                {new Date(selectedCoupon.validFrom).toLocaleDateString()}
+              </div>
+
+              <div>
+                <strong>Valid To:</strong>{" "}
+                {new Date(selectedCoupon.validTo).toLocaleDateString()}
+              </div>
+
+              <div>
+                <strong>Eligible Categories:</strong>{" "}
+                {selectedCoupon.eligibleCategories?.length > 0
+                  ? selectedCoupon.eligibleCategories.join(", ")
+                  : "All Categories"}
+              </div>
+
+              <div>
+                <strong>First Order Only:</strong>{" "}
+                {selectedCoupon.firstOrderOnly ? "Yes" : "No"}
+              </div>
+
+              <div>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    selectedCoupon.isActive
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}
+                >
+                  {selectedCoupon.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
             </div>
-          )}
-        </div>
+          </SideDrawer>
+        )}
       </div>
     </Layout>
   );
