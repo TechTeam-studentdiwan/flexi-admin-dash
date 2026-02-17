@@ -68,7 +68,7 @@ const Orders = () => {
                       </div>
                     </td>
 
-                    <td className="p-4">₹ {order.total}</td>
+                    <td className="p-4">  {order.total}</td>
 
                     <td className="p-4">
                       <span className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700">
@@ -158,7 +158,7 @@ const Orders = () => {
                     <div className="font-medium">{item.name}</div>
                     <div>Size: {item.size}</div>
                     <div>Qty: {item.quantity}</div>
-                    <div>Price: ₹ {item.discountPrice || item.price}</div>
+                    <div>Price:   {item.discountPrice || item.price}</div>
                   </div>
                 ))}
               </div>
@@ -168,11 +168,11 @@ const Orders = () => {
               {/* Pricing Breakdown */}
               <h3 className="font-semibold text-purple-700">Payment Summary</h3>
 
-              <div>Subtotal: ₹ {selectedOrder.subtotal}</div>
-              <div>Discount: ₹ {selectedOrder.discount}</div>
-              <div>Delivery Fee: ₹ {selectedOrder.deliveryFee}</div>
+              <div>Subtotal:   {selectedOrder.subtotal}</div>
+              <div>Discount:   {selectedOrder.discount}</div>
+              <div>Delivery Fee:   {selectedOrder.deliveryFee}</div>
               <div className="font-bold text-lg">
-                Total: ₹ {selectedOrder.total}
+                Total:   {selectedOrder.total}
               </div>
 
               {selectedOrder.couponCode && (

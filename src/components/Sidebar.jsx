@@ -39,7 +39,7 @@ const Sidebar = () => {
     { name: "Orders", path: "/orders", icon: <FaClipboardList /> },
     // { name: "Addresses", path: "/addresses", icon: <FaAddressBook /> },
     // { name: "Measurements", path: "/measurements", icon: <TbRulerMeasure /> },
-    // { name: "Customers", path: "/customers", icon: <FaUsers /> },
+    { name: "Customers", path: "/customers", icon: <FaUsers /> },
     // { name: "Analytics", path: "/analytics", icon: <FaChartLine /> },
   ];
 
@@ -78,19 +78,18 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      {/* Bottom Section */}
-      <div className="p-4 border-t bg-white">
-        <div className="flex items-center gap-3">
+      <div className="p-2 border-t bg-white">
+        <div className="flex items-center justify-between gap-3">
           <button
             onClick={() => navigate("/profile")}
-            className="hover:scale-110 p-2 rounded-md transition"
+            className="hover:scale-110 p-2 rounded-md transition cursor-pointer"
           >
             <FaUserCircle className="text-3xl " />
           </button>
 
           <button
             onClick={logout}
-            className="flex-1 flex items-center justify-center gap-2 bg-red-100 py-2 rounded-md hover:bg-red-200 transition"
+            className="flex-1 flex items-center justify-center gap-2 rounded-md  transition cursor-pointer"
           >
             <FaSignOutAlt />
             Logout

@@ -5,7 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/products/Products";
 import Analytics from "./pages/Analytics";
-import Customers from "./pages/Customers";
+import Customers from "./pages/customers/Customers";
 import Orders from "./pages/orders/Orders";
 import Profile from "./pages/Profile";
 import Cart from "./pages/cart/Cart";
@@ -23,9 +23,9 @@ import AddCategory from "./pages/category/AddCategory";
 import CategoriesMain from "./pages/category/CategoriesMain";
 import EditCategory from "./pages/category/EditCategory";
 import EditProduct from "./pages/products/EditProduct";
-
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditCoupon from "./pages/coupons/EditCoupon";
+import CustomerDetails from "./pages/customers/CustomerDetails";
 
 const App = () => {
   return (
@@ -81,6 +81,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <Customers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/customers/:id"
+            element={
+              <ProtectedRoute>
+                <CustomerDetails />
               </ProtectedRoute>
             }
           />
