@@ -65,7 +65,7 @@ const Products = () => {
               >
                 <div>
                   <h4 className="font-semibold capitalize">{product.name}</h4>
-                  <p>₹ {product.discountPrice || product.price}</p>
+                  <p>  {product.discountPrice || product.price}</p>
                   <p className="text-sm text-gray-500">
                     Stock: {product.stock}
                   </p>
@@ -121,11 +121,11 @@ const Products = () => {
               </p>
 
               <p>
-                <strong>Price:</strong> ₹ {selectedProduct?.price}
+                <strong>Price:</strong>   {selectedProduct?.price}
               </p>
 
               <p>
-                <strong>Discount Price:</strong> ₹{" "}
+                <strong>Discount Price:</strong>  {" "}
                 {selectedProduct?.discountPrice}
               </p>
 
@@ -161,7 +161,7 @@ const Products = () => {
 
               {selectedProduct?.fitAdjustmentEnabled && (
                 <p>
-                  <strong>Fit Adjustment Fee:</strong> ₹{" "}
+                  <strong>Fit Adjustment Fee:</strong>  {" "}
                   {selectedProduct?.fitAdjustmentFee}
                 </p>
               )}

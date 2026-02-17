@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect } from "react";
 import Layout from "../components/Layout";
 import {
   FaUsers,
@@ -7,103 +7,72 @@ import {
   FaBoxOpen,
   FaTicketAlt,
 } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { getDashboardOverview } from "../store/user/userThunks";
 
 const Dashboard = () => {
-  // ---- Backend-shaped dummy data ----
+  const dispatch = useDispatch();
 
-  const users = [
-    { id: "u1" },
-    { id: "u2" },
-    { id: "u3" },
-  ];
+  const { dashboard, loading } = useSelector(
+    (state) => state.users
+  );
 
-  const products = [
-    { id: "p1" },
-    { id: "p2" },
-    { id: "p3" },
-    { id: "p4" },
-  ];
+  useEffect(() => {
+    dispatch(getDashboardOverview());
+  }, [dispatch]);
 
-  const coupons = [
-    { id: "c1", isActive: true },
-    { id: "c2", isActive: false },
-  ];
+  if (loading) {
+    return (
+      <Layout>
+        <div className="p-6">Loading dashboard...</div>
+      </Layout>
+    );
+  }
 
-  const orders = [
-    {
-      id: "ord1",
-      orderNumber: "ORD123456",
-      total: 349,
-      paymentStatus: "paid",
-      orderStatus: "delivered",
-      createdAt: "2024-04-10",
-    },
-    {
-      id: "ord2",
-      orderNumber: "ORD654321",
-      total: 200,
-      paymentStatus: "pending",
-      orderStatus: "processing",
-      createdAt: "2024-04-12",
-    },
-  ];
-
-  // ---- Derived Data ----
-
-  const totalRevenue = useMemo(() => {
-    return orders
-      .filter((o) => o.paymentStatus === "paid")
-      .reduce((sum, o) => sum + o.total, 0);
-  }, [orders]);
-
-  const pendingOrders = orders.filter(
-    (o) => o.orderStatus === "processing"
-  ).length;
-
-  const activeCoupons = coupons.filter((c) => c.isActive).length;
+  if (!dashboard) return null;
 
   const summaryData = [
     {
       title: "Total Users",
-      value: users.length,
+      value: dashboard.totalUsers,
       icon: <FaUsers />,
     },
     {
       title: "Total Orders",
-      value: orders.length,
+      value: dashboard.totalOrders,
       icon: <FaShoppingCart />,
     },
     {
       title: "Revenue",
-      value: `$${totalRevenue}`,
+      value: dashboard.totalRevenue,
       icon: <FaDollarSign />,
     },
     {
       title: "Total Products",
-      value: products.length,
+      value: dashboard.totalProducts,
       icon: <FaBoxOpen />,
     },
     {
       title: "Pending Orders",
-      value: pendingOrders,
+      value: dashboard.pendingOrders,
       icon: <FaShoppingCart />,
     },
     {
       title: "Active Coupons",
-      value: activeCoupons,
+      value: dashboard.activeCoupons,
       icon: <FaTicketAlt />,
     },
   ];
 
   return (
     <Layout>
-      <div className="p-4">
+      <div className="">
         <h2 className="text-2xl font-bold text-purple-800 mb-2">
           Admin Dashboard
         </h2>
 
         <p className="text-purple-600 mb-6">
-          Overview of your e-commerce system
+          dashboard of your e-commerce system
         </p>
 
         {/* SUMMARY CARDS */}
@@ -127,63 +96,45 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* RECENT ORDERS + SYSTEM STATUS */}
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Orders */}
-          <div className="bg-white rounded-lg shadow p-5">
-            <h3 className="text-lg font-semibold mb-3 text-purple-800">
-              Recent Orders
-            </h3>
+        {/* RECENT ORDERS */}
+        <div className="mt-8 bg-white rounded-lg shadow p-5">
+          <h3 className="text-lg font-semibold mb-3 text-purple-800">
+            Recent Orders
+          </h3>
 
+          {dashboard.recentOrders.length === 0 ? (
+            <p>No recent orders</p>
+          ) : (
             <ul className="space-y-3">
-              {orders.map((order) => (
+              {dashboard.recentOrders.map((order) => (
                 <li
-                  key={order.id}
-                  className="bg-white p-3 rounded flex justify-between"
+                  key={order._id}
+                  className="bg-white p-3 rounded flex justify-between border"
                 >
                   <div>
                     <p className="font-semibold text-purple-800">
-                      {order.orderNumber}
+                      {order.shippingAddress?.fullName}
                     </p>
                     <p className="text-sm text-purple-600">
+                      {order.shippingAddress?.phone}
+                    </p>
+                    <p className="text-xs text-gray-500">
                       Status: {order.orderStatus}
                     </p>
                   </div>
 
                   <div className="text-right">
                     <p className="font-semibold text-purple-800">
-                      ${order.total}
+                      {order.total}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {order.createdAt}
+                      {new Date(order.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* System Health */}
-          <div className="bg-white rounded-lg shadow p-5">
-            <h3 className="text-lg font-semibold mb-3 text-purple-800">
-              System Status
-            </h3>
-
-            <div className="space-y-3 text-purple-700">
-              <p className="bg-green-50 p-3 rounded">
-                ✔ Backend API: Running
-              </p>
-              <p className="bg-green-50 p-3 rounded">
-                ✔ Database: Connected
-              </p>
-              <p className="bg-green-50 p-3 rounded">
-                ✔ Payment Gateway: Active
-              </p>
-              <p className="bg-green-50 p-3 rounded">
-                ✔ No critical errors detected
-              </p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </Layout>
