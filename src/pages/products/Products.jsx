@@ -40,7 +40,6 @@ const Products = () => {
   return (
     <Layout>
       <div>
-        {/* Header */}
         <div className="flex justify-between mb-6">
           <h2 className="text-2xl font-bold text-purple-800">
             Product Management
@@ -54,7 +53,6 @@ const Products = () => {
           </button>
         </div>
 
-        {/* List */}
         {loading ? (
           <p>Loading...</p>
         ) : (
@@ -66,7 +64,7 @@ const Products = () => {
                 onClick={() => openDetails(product)}
               >
                 <div>
-                  <h4 className="font-semibold ">{product.name}</h4>
+                  <h4 className="font-semibold capitalize">{product.name}</h4>
                   <p>₹ {product.discountPrice || product.price}</p>
                   <p className="text-sm text-gray-500">
                     Stock: {product.stock}
@@ -106,11 +104,10 @@ const Products = () => {
             onClose={closeDetails}
             title="Product Details"
           >
-            <h2 className="text-2xl font-semibold mb-2">
+            <h2 className="text-2xl font-semibold mb-4 capitalize">
               {selectedProduct?.name}
             </h2>
 
-            {/* Description (HTML safe render) */}
             <div
               className="text-gray-600 mb-4"
               dangerouslySetInnerHTML={{
@@ -118,23 +115,84 @@ const Products = () => {
               }}
             />
 
-            <p>
-              <strong>Price:</strong> ₹ {selectedProduct?.price}
-            </p>
-            <p>
-              <strong>Discount:</strong> ₹ {selectedProduct?.discountPrice}
-            </p>
-            <p>
-              <strong>Fabric:</strong> {selectedProduct?.fabric}
-            </p>
-            <p>
-              <strong>Occasion:</strong> {selectedProduct?.occasion}
-            </p>
-            <p>
-              <strong>Stock:</strong> {selectedProduct?.stock}
-            </p>
+            <div className="space-y-2 text-sm">
+              <p>
+                <strong>Category:</strong> {selectedProduct?.category?.name}
+              </p>
 
-            {/* ✅ Images Section */}
+              <p>
+                <strong>Price:</strong> ₹ {selectedProduct?.price}
+              </p>
+
+              <p>
+                <strong>Discount Price:</strong> ₹{" "}
+                {selectedProduct?.discountPrice}
+              </p>
+
+              <p>
+                <strong>Fabric:</strong> {selectedProduct?.fabric}
+              </p>
+
+              <p>
+                <strong>Occasion:</strong> {selectedProduct?.occasion}
+              </p>
+
+              <p>
+                <strong>Stock:</strong> {selectedProduct?.stock ?? "N/A"}
+              </p>
+
+              <p>
+                <strong>Status:</strong>{" "}
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    selectedProduct?.isActive
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {selectedProduct?.isActive ? "Active" : "Inactive"}
+                </span>
+              </p>
+
+              <p>
+                <strong>Fit Adjustment:</strong>{" "}
+                {selectedProduct?.fitAdjustmentEnabled ? "Enabled" : "Disabled"}
+              </p>
+
+              {selectedProduct?.fitAdjustmentEnabled && (
+                <p>
+                  <strong>Fit Adjustment Fee:</strong> ₹{" "}
+                  {selectedProduct?.fitAdjustmentFee}
+                </p>
+              )}
+
+              <p>
+                <strong>What's Included:</strong>{" "}
+                {selectedProduct?.whatsIncluded}
+              </p>
+
+              <p>
+                <strong>Care Instructions:</strong>{" "}
+                {selectedProduct?.careInstructions}
+              </p>
+            </div>
+
+            {selectedProduct?.tags?.length > 0 && (
+              <div className="mt-6">
+                <strong>Tags:</strong>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {selectedProduct.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-gray-200 rounded-full text-xs"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {selectedProduct?.images?.length > 0 && (
               <div className="mt-6">
                 <h4 className="font-semibold mb-3">Images</h4>
@@ -151,7 +209,6 @@ const Products = () => {
                         className="h-40 w-full object-cover"
                       />
 
-                      {/* Index Badge */}
                       <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
                         #{index}
                       </div>
@@ -161,7 +218,6 @@ const Products = () => {
               </div>
             )}
 
-            {/* Sizes */}
             <div className="mt-6">
               <strong>Sizes:</strong>
               <div className="flex gap-2 mt-2 flex-wrap">
@@ -175,6 +231,42 @@ const Products = () => {
                 ))}
               </div>
             </div>
+
+            {selectedProduct?.sizeChart?.length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-semibold text-lg mb-3">Size Chart</h3>
+
+                <div className="overflow-x-auto border rounded-lg">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-purple-100 text-purple-800">
+                      <tr>
+                        <th className="px-4 py-2">Size</th>
+                        <th className="px-4 py-2">Bust (Max)</th>
+                        <th className="px-4 py-2">Waist (Max)</th>
+                        <th className="px-4 py-2">Hips (Max)</th>
+                        <th className="px-4 py-2">Shoulder (Max)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedProduct.sizeChart.map((item, index) => (
+                        <tr
+                          key={index}
+                          className="border-t hover:bg-gray-50 transition"
+                        >
+                          <td className="px-4 py-2 font-semibold text-purple-700">
+                            {item.size}
+                          </td>
+                          <td className="px-4 py-2">{item.bust_max}</td>
+                          <td className="px-4 py-2">{item.waist_max}</td>
+                          <td className="px-4 py-2">{item.hips_max}</td>
+                          <td className="px-4 py-2">{item.shoulder_max}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </SideDrawer>
         )}
       </div>

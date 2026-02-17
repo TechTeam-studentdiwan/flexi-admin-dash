@@ -1,21 +1,64 @@
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import Layout from "../../components/Layout";
-import { useNavigate } from "react-router-dom";
-import { createCoupon } from "../../store/coupons/couponThunks";
+import { updateCoupon } from "../../store/coupons/couponThunks";
 import RichTextEditor from "../../components/AdminEditor";
 
-const AddCoupons = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const formatDate = (date) => {
+  if (!date) return "";
+  return new Date(date).toISOString().split("T")[0];
+};
 
-  const { register, handleSubmit, control, reset } = useForm({
+const EditCoupon = () => {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const coupon = state?.coupon;
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { isSubmitting },
+  } = useForm({
     defaultValues: {
-      description: "",
+      code: "",
       type: "percentage",
+      description: "",
+      value: 0,
+      minCartValue: 0,
+      maxDiscount: 0,
+      validFrom: "",
+      validTo: "",
+      usageLimit: 0,
+      eligibleCategories: "",
       firstOrderOnly: false,
     },
   });
+
+  useEffect(() => {
+    if (!coupon) {
+      navigate("/coupons");
+    } else {
+      reset({
+        code: coupon.code || "",
+        type: coupon.type || "percentage",
+        description: coupon.description || "",
+        value: coupon.value ?? 0,
+        minCartValue: coupon.minCartValue ?? 0,
+        maxDiscount: coupon.maxDiscount ?? 0,
+        validFrom: formatDate(coupon.validFrom),
+        validTo: formatDate(coupon.validTo),
+        usageLimit: coupon.usageLimit ?? 0,
+        eligibleCategories: coupon.eligibleCategories?.join(", ") || "",
+        firstOrderOnly: coupon.firstOrderOnly || false,
+      });
+    }
+  }, [coupon, navigate, reset]);
 
   const onSubmit = async (data) => {
     try {
@@ -28,35 +71,42 @@ const AddCoupons = () => {
         data.eligibleCategories = data.eligibleCategories
           .split(",")
           .map((c) => c.trim());
+      } else {
+        data.eligibleCategories = [];
       }
 
-      await dispatch(createCoupon(data)).unwrap();
-      reset();
+      await dispatch(
+        updateCoupon({
+          id: coupon._id,
+          data,
+        })
+      ).unwrap();
+
       navigate("/coupons");
     } catch (err) {
       alert(err);
     }
   };
 
+  if (!coupon) return null;
+
   return (
     <Layout>
       <div className="mx-auto bg-white rounded">
         <h2 className="text-2xl font-bold mb-6 text-purple-700">
-          Create Coupon
+          Edit Coupon
         </h2>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-5 border border-gray-300 p-6 rounded-lg"
         >
-          {/* Code */}
           <input
             {...register("code", { required: true })}
             placeholder="Coupon Code"
             className="w-full border p-2 rounded"
           />
 
-          {/* Type */}
           <select
             {...register("type")}
             className="w-full border p-2 rounded"
@@ -66,7 +116,7 @@ const AddCoupons = () => {
             <option value="freedelivery">Free Delivery</option>
           </select>
 
-          {/* Description (Rich Text) */}
+          {/* Rich Text Description */}
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-600">
               Description
@@ -86,7 +136,6 @@ const AddCoupons = () => {
             />
           </div>
 
-          {/* Value */}
           <input
             type="number"
             {...register("value")}
@@ -138,8 +187,12 @@ const AddCoupons = () => {
             First Order Only
           </label>
 
-          <button className="px-4 bg-linear-to-r from-pink-500 to-purple-600 text-white py-2 rounded">
-            Save Coupon
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-4 bg-linear-to-r from-pink-500 to-purple-600 text-white py-2 rounded disabled:opacity-50"
+          >
+            {isSubmitting ? "Updating..." : "Update Coupon"}
           </button>
         </form>
       </div>
@@ -147,4 +200,4 @@ const AddCoupons = () => {
   );
 };
 
-export default AddCoupons;
+export default EditCoupon;

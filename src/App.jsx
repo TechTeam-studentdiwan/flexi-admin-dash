@@ -25,6 +25,7 @@ import EditCategory from "./pages/category/EditCategory";
 import EditProduct from "./pages/products/EditProduct";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import EditCoupon from "./pages/coupons/EditCoupon";
 
 const App = () => {
   return (
@@ -168,6 +169,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <AddCoupons />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit/coupon/:couponId"
+            element={
+              <ProtectedRoute>
+                <EditCoupon />
               </ProtectedRoute>
             }
           />

@@ -34,7 +34,7 @@ const Coupons = () => {
       updateCoupon({
         id: coupon._id,
         data: { isActive: !coupon.isActive },
-      })
+      }),
     );
   };
 
@@ -165,7 +165,15 @@ const Coupons = () => {
             title="Coupon Details"
           >
             <div className="space-y-4 text-sm">
-
+              <div className="flex items-center gap-x-2">
+                <strong>Description:</strong>
+                <div
+                  className="mt-1 text-gray-700"
+                  dangerouslySetInnerHTML={{
+                    __html: selectedCoupon.description || "",
+                  }}
+                />
+              </div>
               <div>
                 <strong>Code:</strong> {selectedCoupon.code}
               </div>
@@ -182,7 +190,8 @@ const Coupons = () => {
               </div>
 
               <div>
-                <strong>Minimum Cart Value:</strong> QAR {selectedCoupon.minCartValue}
+                <strong>Minimum Cart Value:</strong> QAR{" "}
+                {selectedCoupon.minCartValue}
               </div>
 
               <div>

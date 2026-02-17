@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/duipcpitb/image/upload";
-
 const UPLOAD_PRESET = "sms-preset";
 
 const UploadCard = ({
@@ -15,6 +14,11 @@ const UploadCard = ({
   const [preview, setPreview] = useState(value || null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  // ✅ IMPORTANT FIX
+  useEffect(() => {
+    setPreview(value || null);
+  }, [value]);
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -31,7 +35,9 @@ const UploadCard = ({
     try {
       const res = await axios.post(CLOUDINARY_URL, formData, {
         onUploadProgress: (event) => {
-          const percent = Math.round((event.loaded * 100) / event.total);
+          const percent = Math.round(
+            (event.loaded * 100) / event.total
+          );
           setProgress(percent);
         },
       });
@@ -63,7 +69,6 @@ const UploadCard = ({
       <div
         className={`relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-purple-500 transition bg-white ${height}`}
       >
-        {/* Hidden Input */}
         <input
           type="file"
           accept="image/*"
@@ -71,14 +76,12 @@ const UploadCard = ({
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
 
-        {/* No Image */}
         {!preview && !uploading && (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <p className="text-sm">Click to upload</p>
           </div>
         )}
 
-        {/* Uploading */}
         {uploading && (
           <div className="flex flex-col items-center justify-center h-full space-y-3">
             <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -87,11 +90,12 @@ const UploadCard = ({
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-purple-600">Uploading... {progress}%</p>
+            <p className="text-sm text-purple-600">
+              Uploading... {progress}%
+            </p>
           </div>
         )}
 
-        {/* Preview */}
         {preview && !uploading && (
           <div className="relative h-full group">
             <img
