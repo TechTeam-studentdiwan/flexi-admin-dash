@@ -2,7 +2,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Image from "@tiptap/extension-image";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 const ToolbarButton = ({ onClick, active, children }) => (
   <button
@@ -30,9 +30,7 @@ const RichTextEditor = ({
     extensions: [
       StarterKit,
       Underline,
-      Image.configure({
-        inline: false,
-      }),
+      Image.configure({ inline: false }),
     ],
     content: value,
     editable: !readOnly,
@@ -40,6 +38,13 @@ const RichTextEditor = ({
       onChange?.(editor.getHTML());
     },
   });
+
+  // ✅ IMPORTANT: Sync value changes
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value || "", false);
+    }
+  }, [value, editor]);
 
   if (!editor) return null;
 
@@ -63,8 +68,6 @@ const RichTextEditor = ({
 
   return (
     <div className="border rounded-md bg-white">
-      
-      {/* Toolbar */}
       {!readOnly && (
         <div className="flex gap-2 p-2 border-b bg-gray-50 flex-wrap">
           <ToolbarButton
@@ -104,10 +107,7 @@ const RichTextEditor = ({
             H2
           </ToolbarButton>
 
-          {/* Image Button */}
-          <ToolbarButton
-            onClick={() => fileInputRef.current.click()}
-          >
+          <ToolbarButton onClick={() => fileInputRef.current.click()}>
             🖼
           </ToolbarButton>
 
@@ -121,7 +121,6 @@ const RichTextEditor = ({
         </div>
       )}
 
-      {/* Editor */}
       <EditorContent
         editor={editor}
         className="p-3 focus:outline-none"

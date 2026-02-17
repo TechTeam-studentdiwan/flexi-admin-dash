@@ -12,13 +12,23 @@ import {
 } from "react-icons/fa";
 import { TbCategory, TbRulerMeasure } from "react-icons/tb";
 import { RiCoupon2Fill } from "react-icons/ri";
+import { persistor } from "../store/store";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../store/auth/authSlice";
 
 const Sidebar = () => {
   const navigate = useNavigate();
-
-  const logout = () => {
-    localStorage.removeItem("isLoggedIn");
-    navigate("/");
+  const dispatch = useDispatch();
+  const logout = async () => {
+    try {
+      dispatch(logoutUser());
+      await persistor.purge();
+      alert("Logged out successfully");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Something went wrong while logging out");
+    }
   };
 
   const menuItems = [
@@ -35,10 +45,8 @@ const Sidebar = () => {
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-64 bg-white border-r  shadow-md flex flex-col justify-between z-50">
-      
       {/* Top Section */}
       <div className="flex flex-col h-full overflow-y-auto">
-        
         {/* Logo */}
         <div className="p-5 border-b  sticky top-0 bg-white z-10">
           <h2 className="text-2xl font-bold text-center text-purple-700">
@@ -77,7 +85,7 @@ const Sidebar = () => {
             onClick={() => navigate("/profile")}
             className="hover:scale-110 p-2 rounded-md transition"
           >
-            <FaUserCircle className="text-xl text-purple-600" />
+            <FaUserCircle className="text-3xl " />
           </button>
 
           <button
