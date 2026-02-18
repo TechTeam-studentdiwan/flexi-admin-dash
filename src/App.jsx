@@ -8,14 +8,8 @@ import Analytics from "./pages/Analytics";
 import Customers from "./pages/customers/Customers";
 import Orders from "./pages/orders/Orders";
 import Profile from "./pages/Profile";
-import Cart from "./pages/cart/Cart";
 import AddNewOrder from "./pages/orders/AddNewOrder";
-import AddToCart from "./pages/cart/AddToCart";
 import AddProducts from "./pages/products/AddProduct";
-import Addresses from "./pages/addresses/Addresses";
-import AddAddresses from "./pages/addresses/AddAdresses";
-import AddMeasurements from "./pages/measurements/AddMeasurement";
-import Measurements from "./pages/measurements/Measurements";
 import Coupons from "./pages/coupons/Coupons";
 import AddCoupons from "./pages/coupons/AddCoupons";
 import ErrorPage from "./pages/Error";
@@ -116,54 +110,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/add/cart"
-            element={
-              <ProtectedRoute>
-                <AddToCart />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addresses"
-            element={
-              <ProtectedRoute>
-                <Addresses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/add/address"
-            element={
-              <ProtectedRoute>
-                <AddAddresses />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/add/measurement"
-            element={
-              <ProtectedRoute>
-                <AddMeasurements />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/measurements"
-            element={
-              <ProtectedRoute>
-                <Measurements />
-              </ProtectedRoute>
-            }
-          />
+
           <Route
             path="/coupons"
             element={
