@@ -17,6 +17,7 @@ const CategoriesMain = () => {
 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     dispatch(getCategories());
@@ -33,153 +34,177 @@ const CategoriesMain = () => {
     setIsOpen(true);
   };
 
-  const closeDetails = () => {
-    setSelectedCategory(null);
-    setIsOpen(false);
-  };
+  const filteredCategories = categories?.filter((cat) =>
+    cat.name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <Layout>
-      <div>
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-purple-800">
-            Categories
-          </h2>
+      <div className=" mx-auto  space-y-8">
 
-          <button
-            className="px-4 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded-sm shadow hover:opacity-90 transition"
-            onClick={() => navigate("/add/category")}
-          >
-             Add New
-          </button>
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <h2 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+              Categories
+            </h2>
+            <p className="text-gray-500 mt-1">
+              Manage your product categories
+            </p>
+          </div>
+
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Search category..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-500"
+            />
+
+            <button
+              className="px-5 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded-xl shadow hover:opacity-90 transition"
+              onClick={() => navigate("/add/category")}
+            >
+              + Add Category
+            </button>
+          </div>
         </div>
 
-        {/* Table Card */}
-        <div className="bg-white shadow-md rounded-xl overflow-hidden">
+
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           {loading ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 animate-pulse">
               Loading categories...
             </div>
-          ) : categories.length === 0 ? (
-            <div className="p-6 text-center text-gray-400">
+          ) : filteredCategories.length === 0 ? (
+            <div className="p-8 text-center text-gray-400">
               No categories found.
             </div>
           ) : (
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="p-4 text-sm font-semibold text-gray-600">
-                    Name
-                  </th>
-                  <th className="p-4 text-sm font-semibold text-gray-600">
-                    Order
-                  </th>
-                  <th className="p-4 text-sm font-semibold text-gray-600 text-right">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {categories.map((cat) => (
-                  <tr
-                    key={cat._id}
-                    onClick={() => openDetails(cat)}
-                    className="border-t hover:bg-gray-50 transition cursor-pointer"
-                  >
-                    {/* Name + Image */}
-                    <td className="p-4 font-medium text-gray-700 flex items-center gap-3">
-                      {cat.image ? (
-                        <img
-                          src={cat.image}
-                          alt={cat.name}
-                          className="h-12 w-12 object-cover rounded-full border"
-                        />
-                      ) : (
-                        <div className="h-12 w-12 flex items-center justify-center bg-gray-200 rounded-full text-gray-400 text-xs">
-                          No Img
-                        </div>
-                      )}
-                      {cat.name}
-                    </td>
-
-                    {/* Order */}
-                    <td className="p-4 text-gray-600">
-                      {cat.order}
-                    </td>
-
-                    {/* Actions */}
-                    <td
-                      className="p-4 text-right space-x-3"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        onClick={() =>
-                          navigate(`/edit/category/${cat._id}`, {
-                            state: { category: cat },
-                          })
-                        }
-                        className="p-2 hover:text-purple-600"
-                      >
-                        <FaEdit />
-                      </button>
-
-                      <button
-                        onClick={() => handleDelete(cat._id)}
-                        className="p-2 hover:text-red-600"
-                      >
-                        <FaTrash />
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wide">
+                  <tr>
+                    <th className="p-4">Category</th>
+                    <th className="p-4">Display Order</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody className="divide-y">
+                  {filteredCategories.map((cat) => (
+                    <tr
+                      key={cat._id}
+                      onClick={() => openDetails(cat)}
+                      className="hover:bg-gray-50 cursor-pointer transition"
+                    >
+
+                      <td className="p-4 flex items-center gap-4">
+                        {cat.image ? (
+                          <img
+                            src={cat.image}
+                            alt={cat.name}
+                            className="h-14 w-14 rounded-xl object-cover border"
+                          />
+                        ) : (
+                          <div className="h-14 w-14 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                            No Image
+                          </div>
+                        )}
+
+                        <div>
+                          <p className="font-semibold text-gray-800">
+                            {cat.name}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            ID: {cat._id.slice(-6)}
+                          </p>
+                        </div>
+                      </td>
+
+                      <td className="p-4">
+                        <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                          {cat.order}
+                        </span>
+                      </td>
+
+                      <td
+                        className="p-4 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex justify-end gap-4">
+                          <button
+                            onClick={() =>
+                              navigate(`/edit/category/${cat._id}`, {
+                                state: { category: cat },
+                              })
+                            }
+                            className="p-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition"
+                          >
+                            <FaEdit />
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(cat._id)}
+                            className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
-        {/* Sidebar Drawer */}
         {isOpen && selectedCategory && (
           <SideDrawer
             isOpen={isOpen}
-            onClose={closeDetails}
+            onClose={() => setIsOpen(false)}
             title="Category Details"
           >
-            <div className="space-y-4 text-sm">
+            <div className="space-y-6">
 
-              {/* Image */}
               {selectedCategory.image ? (
                 <img
                   src={selectedCategory.image}
                   alt={selectedCategory.name}
-                  className="w-full h-40 object-cover rounded-lg border"
+                  className="w-full h-48 object-cover rounded-xl shadow"
                 />
               ) : (
-                <div className="w-full h-40 flex items-center justify-center bg-gray-200 rounded-lg text-gray-400">
-                  No Image
+                <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-xl text-gray-400">
+                  No Image Available
                 </div>
               )}
 
-              <div>
-                <strong>Name:</strong> {selectedCategory.name}
-              </div>
+              <div className="space-y-3 text-sm text-gray-700">
+                <div>
+                  <span className="font-semibold">Name:</span>{" "}
+                  {selectedCategory.name}
+                </div>
 
-              <div>
-                <strong>Order:</strong> {selectedCategory.order}
-              </div>
+                <div>
+                  <span className="font-semibold">Order:</span>{" "}
+                  {selectedCategory.order}
+                </div>
 
-              <div>
-                <strong>ID:</strong> {selectedCategory._id}
-              </div>
+                <div>
+                  <span className="font-semibold">ID:</span>{" "}
+                  {selectedCategory._id}
+                </div>
 
-              <div>
-                <strong>Updated At:</strong>{" "}
-                {new Date(selectedCategory.updatedAt).toLocaleString()}
+                <div>
+                  <span className="font-semibold">Updated:</span>{" "}
+                  {new Date(selectedCategory.updatedAt).toLocaleString()}
+                </div>
               </div>
             </div>
           </SideDrawer>
         )}
+
       </div>
     </Layout>
   );
