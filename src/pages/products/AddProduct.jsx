@@ -6,17 +6,40 @@ import { useNavigate } from "react-router-dom";
 import { addProduct } from "../../store/products/productThunks";
 import RichTextEditor from "../../components/AdminEditor";
 import UploadCard from "../../components/UploadCard";
+const occasions = [
+  "All",
+  "Ramadan",
+  "Eid",
+  "Wedding",
+  "Festive",
+  "Casual",
+  "Party Wear",
+  "Formal",
+  "Office Wear",
+  "luxurious",
+  "other",
+];
+
+const fabrics = [
+  "All",
+  "Cotton",
+  "Lawn",
+  "Silk",
+  "Georgette",
+  "Chiffon",
+  "Linen",
+  "Velvet",
+  "Rayon",
+  "Net",
+  "Organza",
+  "Pashmina",
+  "other",
+];
 
 const AddProducts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const {
-    register,
-    handleSubmit,
-    reset,
-    control,
-    watch,
-  } = useForm();
+  const { register, handleSubmit, reset, control, watch } = useForm();
 
   const { categories } = useSelector((state) => state.category);
 
@@ -36,7 +59,7 @@ const AddProducts = () => {
     setImages((prev) =>
       prev
         .filter((_, i) => i !== indexToRemove)
-        .map((img, i) => ({ ...img, index: i }))
+        .map((img, i) => ({ ...img, index: i })),
     );
   };
 
@@ -208,17 +231,26 @@ const AddProducts = () => {
             className="w-full border p-2 rounded"
           />
 
-          <input
-            {...register("fabric")}
-            placeholder="Fabric"
-            className="w-full border p-2 rounded"
-          />
+          <select {...register("fabric")} className="w-full border p-2 rounded">
+            <option value="">Select Fabric</option>
+            {fabrics.map((fabric) => (
+              <option key={fabric} value={fabric}>
+                {fabric}
+              </option>
+            ))}
+          </select>
 
-          <input
+          <select
             {...register("occasion")}
-            placeholder="Occasion"
             className="w-full border p-2 rounded"
-          />
+          >
+            <option value="">Select Occasion</option>
+            {occasions.map((occasion) => (
+              <option key={occasion} value={occasion}>
+                {occasion}
+              </option>
+            ))}
+          </select>
 
           {/* Sizes */}
           <input
@@ -289,10 +321,7 @@ const AddProducts = () => {
 
           {/* Fit Adjustment */}
           <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              {...register("fitAdjustmentEnabled")}
-            />
+            <input type="checkbox" {...register("fitAdjustmentEnabled")} />
             <label>Enable Fit Adjustment</label>
           </div>
 

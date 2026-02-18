@@ -53,7 +53,7 @@ const Coupons = () => {
       <div>
         {/* Header */}
         <div className="flex justify-between mb-6">
-          <h2 className="text-2xl font-bold text-purple-800">
+          <h2 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
             Coupon Management
           </h2>
 

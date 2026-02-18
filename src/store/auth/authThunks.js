@@ -24,4 +24,22 @@ export const loginUser = createAsyncThunk(
 );
 
 
+export const updateUserProfileThunk = createAsyncThunk(
+  "users/updateUser",
+  async ({ userId, data }, { rejectWithValue }) => {
+    try {
+      const res = await axios.put(
+        `${BACKEND_URL}/user/update-profile/${userId}`,
+        data,
+        {withCredentials:true}
+      );
+
+      return res.data.user;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to update user"
+      );
+    }
+  }
+);
 

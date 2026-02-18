@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Layout from "../../components/Layout";
 import { useNavigate } from "react-router-dom";
-import { FaTrash, FaEdit, FaTimes } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import { getProducts, deleteProduct } from "../../store/products/productThunks";
 import SideDrawer from "../../components/SideDrawer";
 
@@ -11,11 +11,9 @@ const Products = () => {
   const navigate = useNavigate();
 
   const { products, loading } = useSelector((state) => state.product);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editProduct, setEditProduct] = useState(null);
-
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     dispatch(getProducts());
@@ -32,66 +30,103 @@ const Products = () => {
     setIsOpen(true);
   };
 
-  const closeDetails = () => {
-    setIsOpen(false);
-    setSelectedProduct(null);
-  };
+  const filteredProducts = products?.filter((p) =>
+    p.name?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <Layout>
-      <div>
-        <div className="flex justify-between mb-6">
-          <h2 className="text-2xl font-bold text-purple-800">
-            Product Management
-          </h2>
+      <div className=" mx-auto  space-y-8">
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <h2 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+              Product Management
+            </h2>
+            <p className="text-gray-500 mt-1">
+              Manage all products in your store
+            </p>
+          </div>
 
-          <button
-            className="px-4 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded"
-            onClick={() => navigate("/add/products")}
-          >
-            Add New
-          </button>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              placeholder="Search product..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-500"
+            />
+
+            <button
+              className="px-5 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded-xl shadow hover:opacity-90 transition"
+              onClick={() => navigate("/add/products")}
+            >
+              + Add Product
+            </button>
+          </div>
         </div>
 
+
         {loading ? (
-          <p>Loading...</p>
+          <div className="animate-pulse text-gray-500">Loading products...</div>
         ) : (
-          <div className="bg-white shadow rounded-lg p-5 space-y-4">
-            {products.map((product) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {filteredProducts?.map((product) => (
               <div
                 key={product._id}
-                className="flex justify-between border p-4 rounded hover:bg-gray-50 cursor-pointer transition"
                 onClick={() => openDetails(product)}
+                className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 overflow-hidden"
               >
-                <div>
-                  <h4 className="font-semibold capitalize">{product.name}</h4>
-                  <p>  {product.discountPrice || product.price}</p>
+                {product.images?.[0] && (
+                  <img
+                    src={product.images[0]}
+                    alt={product.name}
+                    className="h-56 w-full object-cover"
+                  />
+                )}
+
+                <div className="p-5 space-y-3">
+                  <h4 className="font-semibold text-lg capitalize text-gray-800">
+                    {product.name}
+                  </h4>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl font-bold text-purple-600">
+                         {product.discountPrice || product.price}
+                    </span>
+
+                    {product.discountPrice && (
+                      <span className="text-sm line-through text-gray-400">
+                           {product.price}
+                      </span>
+                    )}
+                  </div>
+
                   <p className="text-sm text-gray-500">
                     Stock: {product.stock}
                   </p>
-                </div>
 
-                <div
-                  className="flex gap-3 items-center"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    className="p-2 rounded"
-                    onClick={() =>
-                      navigate(`/edit/products/${product._id}`, {
-                        state: { product },
-                      })
-                    }
+                  <div
+                    className="flex justify-end gap-4 pt-3"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <FaEdit />
-                  </button>
+                    <button
+                      onClick={() =>
+                        navigate(`/edit/products/${product._id}`, {
+                          state: { product },
+                        })
+                      }
+                      className="p-2 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 transition"
+                    >
+                      <FaEdit />
+                    </button>
 
-                  <button
-                    className=" p-2 rounded"
-                    onClick={() => handleDelete(product._id)}
-                  >
-                    <FaTrash />
-                  </button>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -101,172 +136,64 @@ const Products = () => {
         {isOpen && selectedProduct && (
           <SideDrawer
             isOpen={isOpen}
-            onClose={closeDetails}
+            onClose={() => setIsOpen(false)}
             title="Product Details"
           >
-            <h2 className="text-2xl font-semibold mb-4 capitalize">
-              {selectedProduct?.name}
-            </h2>
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold capitalize text-gray-800">
+                {selectedProduct.name}
+              </h2>
 
-            <div
-              className="text-gray-600 mb-4"
-              dangerouslySetInnerHTML={{
-                __html: selectedProduct?.description || "",
-              }}
-            />
+              <div className="flex gap-4 items-center">
+                <span className="text-2xl font-bold text-purple-600">
+                     {selectedProduct.discountPrice || selectedProduct.price}
+                </span>
 
-            <div className="space-y-2 text-sm">
-              <p>
-                <strong>Category:</strong> {selectedProduct?.category?.name}
-              </p>
+                {selectedProduct.discountPrice && (
+                  <span className="line-through text-gray-400">
+                       {selectedProduct.price}
+                  </span>
+                )}
+              </div>
 
-              <p>
-                <strong>Price:</strong>   {selectedProduct?.price}
-              </p>
-
-              <p>
-                <strong>Discount Price:</strong>  {" "}
-                {selectedProduct?.discountPrice}
-              </p>
-
-              <p>
-                <strong>Fabric:</strong> {selectedProduct?.fabric}
-              </p>
-
-              <p>
-                <strong>Occasion:</strong> {selectedProduct?.occasion}
-              </p>
-
-              <p>
-                <strong>Stock:</strong> {selectedProduct?.stock ?? "N/A"}
-              </p>
-
-              <p>
-                <strong>Status:</strong>{" "}
+              <div>
                 <span
-                  className={`px-2 py-1 rounded text-xs ${
-                    selectedProduct?.isActive
+                  className={`px-3 py-1 rounded-full text-xs ${
+                    selectedProduct.isActive
                       ? "bg-green-100 text-green-700"
                       : "bg-red-100 text-red-700"
                   }`}
                 >
-                  {selectedProduct?.isActive ? "Active" : "Inactive"}
+                  {selectedProduct.isActive ? "Active" : "Inactive"}
                 </span>
-              </p>
+              </div>
 
-              <p>
-                <strong>Fit Adjustment:</strong>{" "}
-                {selectedProduct?.fitAdjustmentEnabled ? "Enabled" : "Disabled"}
-              </p>
+              <div
+                className="prose max-w-none text-gray-600"
+                dangerouslySetInnerHTML={{
+                  __html: selectedProduct.description || "",
+                }}
+              />
+              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                <div>Fabric: {selectedProduct.fabric}</div>
+                <div>Occasion: {selectedProduct.occasion}</div>
+                <div>Stock: {selectedProduct.stock}</div>
+                <div>Category: {selectedProduct.category?.name}</div>
+              </div>
 
-              {selectedProduct?.fitAdjustmentEnabled && (
-                <p>
-                  <strong>Fit Adjustment Fee:</strong>  {" "}
-                  {selectedProduct?.fitAdjustmentFee}
-                </p>
-              )}
-
-              <p>
-                <strong>What's Included:</strong>{" "}
-                {selectedProduct?.whatsIncluded}
-              </p>
-
-              <p>
-                <strong>Care Instructions:</strong>{" "}
-                {selectedProduct?.careInstructions}
-              </p>
-            </div>
-
-            {selectedProduct?.tags?.length > 0 && (
-              <div className="mt-6">
-                <strong>Tags:</strong>
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  {selectedProduct.tags.map((tag, index) => (
+              {selectedProduct.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedProduct.tags.map((tag, i) => (
                     <span
-                      key={index}
-                      className="px-3 py-1 bg-gray-200 rounded-full text-xs"
+                      key={i}
+                      className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs"
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {selectedProduct?.images?.length > 0 && (
-              <div className="mt-6">
-                <h4 className="font-semibold mb-3">Images</h4>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {selectedProduct.images.map((img, index) => (
-                    <div
-                      key={index}
-                      className="relative border rounded-lg overflow-hidden bg-gray-50"
-                    >
-                      <img
-                        src={img}
-                        alt={`Product ${index}`}
-                        className="h-40 w-full object-cover"
-                      />
-
-                      <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                        #{index}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="mt-6">
-              <strong>Sizes:</strong>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {selectedProduct?.sizes?.map((size) => (
-                  <span
-                    key={size}
-                    className="px-3 py-1 bg-purple-100 rounded-full text-sm"
-                  >
-                    {size}
-                  </span>
-                ))}
-              </div>
+              )}
             </div>
-
-            {selectedProduct?.sizeChart?.length > 0 && (
-              <div className="mt-6">
-                <h3 className="font-semibold text-lg mb-3">Size Chart</h3>
-
-                <div className="overflow-x-auto border rounded-lg">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-purple-100 text-purple-800">
-                      <tr>
-                        <th className="px-4 py-2">Size</th>
-                        <th className="px-4 py-2">Bust (Max)</th>
-                        <th className="px-4 py-2">Waist (Max)</th>
-                        <th className="px-4 py-2">Hips (Max)</th>
-                        <th className="px-4 py-2">Shoulder (Max)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedProduct.sizeChart.map((item, index) => (
-                        <tr
-                          key={index}
-                          className="border-t hover:bg-gray-50 transition"
-                        >
-                          <td className="px-4 py-2 font-semibold text-purple-700">
-                            {item.size}
-                          </td>
-                          <td className="px-4 py-2">{item.bust_max}</td>
-                          <td className="px-4 py-2">{item.waist_max}</td>
-                          <td className="px-4 py-2">{item.hips_max}</td>
-                          <td className="px-4 py-2">{item.shoulder_max}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
           </SideDrawer>
         )}
       </div>

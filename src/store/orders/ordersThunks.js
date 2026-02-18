@@ -21,3 +21,25 @@ export const getAllOrders = createAsyncThunk(
     }
   }
 );
+
+
+export const updateOrderByAdminThunk = createAsyncThunk(
+  "orders/updateOrderByAdmin",
+  async ({ orderId, updateData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/update/${orderId}`,
+        updateData,
+        {
+          withCredentials: true, // if you use cookies auth
+        }
+      );
+
+      return response.data.order;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to update order"
+      );
+    }
+  }
+);

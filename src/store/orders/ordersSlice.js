@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllOrders } from "./ordersThunks";
-
+import { getAllOrders, updateOrderByAdminThunk } from "./ordersThunks";
 
 const initialState = {
   orders: [],
@@ -38,6 +37,25 @@ const orderSlice = createSlice({
       })
 
       .addCase(getAllOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(updateOrderByAdminThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(updateOrderByAdminThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = state.orders.map((order) =>
+          order._id === action.payload._id
+            ? action.payload
+            : order
+        );
+      })
+
+      .addCase(updateOrderByAdminThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

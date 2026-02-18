@@ -6,6 +6,33 @@ import Layout from "../../components/Layout";
 import { updateProduct } from "../../store/products/productThunks";
 import RichTextEditor from "../../components/AdminEditor";
 import UploadCard from "../../components/UploadCard";
+const occasions = [
+  "Ramadan",
+  "Eid",
+  "Wedding",
+  "Festive",
+  "Casual",
+  "Party Wear",
+  "Formal",
+  "Office Wear",
+  "Luxurious",
+  "Other",
+];
+
+const fabrics = [
+  "Cotton",
+  "Lawn",
+  "Silk",
+  "Georgette",
+  "Chiffon",
+  "Linen",
+  "Velvet",
+  "Rayon",
+  "Net",
+  "Organza",
+  "Pashmina",
+  "Other",
+];
 
 const EditProduct = () => {
   const { state } = useLocation();
@@ -14,14 +41,7 @@ const EditProduct = () => {
 
   const product = state?.product;
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    reset,
-    watch,
-    setValue,
-  } = useForm({
+  const { register, handleSubmit, control, reset, watch, setValue } = useForm({
     defaultValues: {
       fitAdjustmentEnabled: false,
     },
@@ -56,7 +76,7 @@ const EditProduct = () => {
           product.images.map((url, index) => ({
             url,
             index,
-          }))
+          })),
         );
       }
 
@@ -82,7 +102,7 @@ const EditProduct = () => {
     setImages((prev) =>
       prev
         .filter((_, i) => i !== indexToRemove)
-        .map((img, i) => ({ ...img, index: i }))
+        .map((img, i) => ({ ...img, index: i })),
     );
   };
 
@@ -138,7 +158,7 @@ const EditProduct = () => {
         updateProduct({
           id: product._id,
           data,
-        })
+        }),
       ).unwrap();
 
       navigate("/products");
@@ -157,20 +177,48 @@ const EditProduct = () => {
         </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-
           <input {...register("name")} className="w-full border p-2 rounded" />
 
-          <input type="number" {...register("price")} className="w-full border p-2 rounded" />
+          <input
+            type="number"
+            {...register("price")}
+            className="w-full border p-2 rounded"
+          />
 
-          <input type="number" {...register("discountPrice")} className="w-full border p-2 rounded" />
+          <input
+            type="number"
+            {...register("discountPrice")}
+            className="w-full border p-2 rounded"
+          />
 
-          <input {...register("fabric")} className="w-full border p-2 rounded" />
+          <select {...register("fabric")} className="w-full border p-2 rounded">
+            <option value="">Select Fabric</option>
+            {fabrics.map((fabric) => (
+              <option key={fabric} value={fabric}>
+                {fabric}
+              </option>
+            ))}
+          </select>
 
-          <input {...register("occasion")} className="w-full border p-2 rounded" />
+          <select
+            {...register("occasion")}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">Select Occasion</option>
+            {occasions.map((occasion) => (
+              <option key={occasion} value={occasion}>
+                {occasion}
+              </option>
+            ))}
+          </select>
 
           <input {...register("sizes")} className="w-full border p-2 rounded" />
 
-          <input type="number" {...register("stock")} className="w-full border p-2 rounded" />
+          <input
+            type="number"
+            {...register("stock")}
+            className="w-full border p-2 rounded"
+          />
 
           {/* Dynamic Size Chart */}
           {sizesValue && (
@@ -182,7 +230,10 @@ const EditProduct = () => {
                 .map((size) => size.trim())
                 .filter(Boolean)
                 .map((size, index) => (
-                  <div key={index} className="border p-3 rounded bg-white space-y-2">
+                  <div
+                    key={index}
+                    className="border p-3 rounded bg-white space-y-2"
+                  >
                     <h4 className="font-medium text-purple-700">
                       Size: {size}
                     </h4>
@@ -191,28 +242,36 @@ const EditProduct = () => {
                       <input
                         type="number"
                         placeholder="Bust Max"
-                        {...register(`sizeChart.${index}.bust_max`, { valueAsNumber: true })}
+                        {...register(`sizeChart.${index}.bust_max`, {
+                          valueAsNumber: true,
+                        })}
                         className="border p-2 rounded"
                       />
 
                       <input
                         type="number"
                         placeholder="Waist Max"
-                        {...register(`sizeChart.${index}.waist_max`, { valueAsNumber: true })}
+                        {...register(`sizeChart.${index}.waist_max`, {
+                          valueAsNumber: true,
+                        })}
                         className="border p-2 rounded"
                       />
 
                       <input
                         type="number"
                         placeholder="Hips Max"
-                        {...register(`sizeChart.${index}.hips_max`, { valueAsNumber: true })}
+                        {...register(`sizeChart.${index}.hips_max`, {
+                          valueAsNumber: true,
+                        })}
                         className="border p-2 rounded"
                       />
 
                       <input
                         type="number"
                         placeholder="Shoulder Max"
-                        {...register(`sizeChart.${index}.shoulder_max`, { valueAsNumber: true })}
+                        {...register(`sizeChart.${index}.shoulder_max`, {
+                          valueAsNumber: true,
+                        })}
                         className="border p-2 rounded"
                       />
                     </div>
@@ -230,8 +289,14 @@ const EditProduct = () => {
 
           <div className="grid grid-cols-4 gap-4">
             {images.map((img, index) => (
-              <div key={index} className="border rounded-lg p-2 relative bg-gray-50">
-                <img src={img.url} className="h-32 w-full object-cover rounded" />
+              <div
+                key={index}
+                className="border rounded-lg p-2 relative bg-gray-50"
+              >
+                <img
+                  src={img.url}
+                  className="h-32 w-full object-cover rounded"
+                />
 
                 <div className="flex justify-between mt-2">
                   <span>#{index}</span>
