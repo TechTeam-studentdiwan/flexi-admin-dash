@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/orders"; // change if needed
+const BASE_URL = "https://flexiibackend.up.railway.app/orders"; // change if needed
 
 // 🔹 Get All Orders (Admin)
 export const getAllOrders = createAsyncThunk(

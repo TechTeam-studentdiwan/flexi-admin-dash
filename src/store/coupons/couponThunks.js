@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/coupons";
+const BASE_URL = "https://flexiibackend.up.railway.app/coupons";
 
 export const getCoupons = createAsyncThunk(
   "coupon/getCoupons",
