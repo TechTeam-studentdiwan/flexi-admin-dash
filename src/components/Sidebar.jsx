@@ -49,7 +49,7 @@ const Sidebar = () => {
       <div className="flex flex-col h-full overflow-y-auto">
         {/* Logo */}
         <div className="p-5 border-b  sticky top-0 bg-white z-10">
-          <h2 className="text-2xl font-bold text-center text-purple-700">
+          <h2 className="text-2xl font-extrabold text-center ">
             Flexi
           </h2>
         </div>
