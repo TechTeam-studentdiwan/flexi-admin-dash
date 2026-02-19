@@ -58,10 +58,10 @@ const Coupons = () => {
           </h2>
 
           <button
-            className="px-4 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded"
+            className="px-5 py-2 bg-linear-to-r from-pink-500 to-purple-600 text-white rounded-xl shadow hover:opacity-90 transition"
             onClick={() => navigate("/add/coupon")}
           >
-            Add New
+          + Add Coupon
           </button>
         </div>
 
