@@ -19,6 +19,8 @@ import EditProduct from "./pages/products/EditProduct";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditCoupon from "./pages/coupons/EditCoupon";
 import CustomerDetails from "./pages/customers/CustomerDetails";
+import Offers from "./pages/offers/Offers";
+import AddEditOffer from "./pages/offers/AddEditOffer";
 
 const App = () => {
   return (
@@ -155,6 +157,30 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <EditCategory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/offers"
+            element={
+              <ProtectedRoute>
+                <Offers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add/offer"
+            element={
+              <ProtectedRoute>
+                <AddEditOffer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit/offer/:id"
+            element={
+              <ProtectedRoute>
+                <AddEditOffer />
               </ProtectedRoute>
             }
           />

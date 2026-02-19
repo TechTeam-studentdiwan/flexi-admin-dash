@@ -13,7 +13,7 @@ const SideDrawer = ({
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/10 z-40 transition-opacity"
+        className="fixed inset-0 bg-black/25 z-40 transition-opacity"
         onClick={onClose}
       />
 

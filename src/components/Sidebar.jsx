@@ -11,7 +11,7 @@ import {
   FaAddressBook,
 } from "react-icons/fa";
 import { TbCategory, TbRulerMeasure } from "react-icons/tb";
-import { RiCoupon2Fill } from "react-icons/ri";
+import { RiCoupon2Fill, RiDiscountPercentFill } from "react-icons/ri";
 import { persistor } from "../store/store";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../store/auth/authSlice";
@@ -40,6 +40,7 @@ const Sidebar = () => {
     // { name: "Addresses", path: "/addresses", icon: <FaAddressBook /> },
     // { name: "Measurements", path: "/measurements", icon: <TbRulerMeasure /> },
     { name: "Customers", path: "/customers", icon: <FaUsers /> },
+    { name: "Offers", path: "/offers", icon: <RiDiscountPercentFill /> },
     // { name: "Analytics", path: "/analytics", icon: <FaChartLine /> },
   ];
 
