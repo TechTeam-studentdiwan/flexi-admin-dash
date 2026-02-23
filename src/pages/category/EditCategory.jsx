@@ -5,12 +5,13 @@ import { useForm } from "react-hook-form";
 import Layout from "../../components/Layout";
 import { updateCategory } from "../../store/category/categoryThunks";
 import UploadCard from "../../components/UploadCard";
+import { usePopup } from "../../components/PopupMessage/PopupContext";
 
 const EditCategory = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const { popMessage } = usePopup();
   const category = state?.category;
 
   const {
@@ -50,12 +51,12 @@ const EditCategory = () => {
         updateCategory({
           id: category._id,
           data,
-        })
+        }),
       ).unwrap();
 
       navigate("/category");
     } catch (err) {
-      alert(err);
+      popMessage("something went wrong");
     }
   };
 
@@ -72,7 +73,6 @@ const EditCategory = () => {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-5 border border-gray-400 p-4 rounded-lg"
         >
-          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Category Name
@@ -84,13 +84,9 @@ const EditCategory = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2"
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.name.message}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
             )}
           </div>
-
-          {/* Upload Card (with default image) */}
           <UploadCard
             label="Category Image"
             value={imageValue}
@@ -98,7 +94,6 @@ const EditCategory = () => {
             folder="categories"
           />
 
-          {/* Order */}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Display Order

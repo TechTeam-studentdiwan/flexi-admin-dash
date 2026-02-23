@@ -7,7 +7,6 @@ const CustomerDetails = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { products } = useSelector((state) => state.product);
-  console.log(products);
 
   const user = state?.user;
 
@@ -77,7 +76,6 @@ const CustomerDetails = () => {
           </div>
         </div>
 
-        {/* Measurement Profiles */}
         <div className="bg-white p-6 rounded-xl shadow">
           <h3 className="text-lg font-semibold text-purple-800 mb-4">
             Measurement Profiles
@@ -109,8 +107,6 @@ const CustomerDetails = () => {
             ))}
           </div>
         </div>
-
-        {/* Wishlist */}
         <div className="bg-white p-6 rounded-2xl shadow border border-gray-100">
           <h3 className="text-lg font-semibold text-purple-800 mb-6">
             Wishlist
@@ -127,7 +123,7 @@ const CustomerDetails = () => {
                   key={product._id}
                   className="border rounded-xl overflow-hidden hover:shadow-lg transition"
                 >
-                  {/* IMAGE */}
+
                   {product.images?.[0] && (
                     <img
                       src={product.images[0]}
@@ -136,7 +132,7 @@ const CustomerDetails = () => {
                     />
                   )}
 
-                  {/* CONTENT */}
+   
                   <div className="p-4 space-y-2">
                     <h4 className="font-semibold text-gray-800 line-clamp-2">
                       {product.name}
@@ -175,8 +171,6 @@ const CustomerDetails = () => {
             </div>
           )}
         </div>
-
-        {/* Back Button */}
         <button
           onClick={() => navigate("/customers")}
           className="px-4 py-2 bg-linear-to-r from-pink-500 to-purple-500 text-white rounded"

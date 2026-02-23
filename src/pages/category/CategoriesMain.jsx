@@ -8,6 +8,7 @@ import Layout from "../../components/Layout";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import SideDrawer from "../../components/SideDrawer";
+import Spinner from "../../components/Spinner";
 
 const CategoriesMain = () => {
   const dispatch = useDispatch();
@@ -35,21 +36,18 @@ const CategoriesMain = () => {
   };
 
   const filteredCategories = categories?.filter((cat) =>
-    cat.name?.toLowerCase().includes(search.toLowerCase())
+    cat.name?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <Layout>
       <div className=" mx-auto  space-y-8">
-
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
           <div>
             <h2 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
               Categories
             </h2>
-            <p className="text-gray-500 mt-1">
-              Manage your product categories
-            </p>
+            <p className="text-gray-500 mt-1">Manage your product categories</p>
           </div>
 
           <div className="flex gap-4">
@@ -70,11 +68,10 @@ const CategoriesMain = () => {
           </div>
         </div>
 
-
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           {loading ? (
             <div className="p-8 text-center text-gray-500 animate-pulse">
-              Loading categories...
+              <Spinner color="black"/>
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="p-8 text-center text-gray-400">
@@ -98,7 +95,6 @@ const CategoriesMain = () => {
                       onClick={() => openDetails(cat)}
                       className="hover:bg-gray-50 cursor-pointer transition"
                     >
-
                       <td className="p-4 flex items-center gap-4">
                         {cat.image ? (
                           <img
@@ -167,7 +163,6 @@ const CategoriesMain = () => {
             title="Category Details"
           >
             <div className="space-y-6">
-
               {selectedCategory.image ? (
                 <img
                   src={selectedCategory.image}
@@ -204,7 +199,6 @@ const CategoriesMain = () => {
             </div>
           </SideDrawer>
         )}
-
       </div>
     </Layout>
   );

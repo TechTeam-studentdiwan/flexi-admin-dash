@@ -8,7 +8,7 @@ import RichTextEditor from "../../components/AdminEditor";
 const AddCoupons = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const { popMessage } = usePopup();
   const { register, handleSubmit, control, reset } = useForm({
     defaultValues: {
       description: "",
@@ -34,7 +34,7 @@ const AddCoupons = () => {
       reset();
       navigate("/coupons");
     } catch (err) {
-      alert(err);
+      popMessage("something went wrong");
     }
   };
 
@@ -49,24 +49,17 @@ const AddCoupons = () => {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-5 border border-gray-300 p-6 rounded-lg"
         >
-          {/* Code */}
           <input
             {...register("code", { required: true })}
             placeholder="Coupon Code"
             className="w-full border p-2 rounded"
           />
 
-          {/* Type */}
-          <select
-            {...register("type")}
-            className="w-full border p-2 rounded"
-          >
+          <select {...register("type")} className="w-full border p-2 rounded">
             <option value="percentage">Percentage</option>
             <option value="flat">Flat</option>
             <option value="freedelivery">Free Delivery</option>
           </select>
-
-          {/* Description (Rich Text) */}
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-600">
               Description
@@ -85,8 +78,6 @@ const AddCoupons = () => {
               )}
             />
           </div>
-
-          {/* Value */}
           <input
             type="number"
             {...register("value")}
