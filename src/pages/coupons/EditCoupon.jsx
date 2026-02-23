@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import Layout from "../../components/Layout";
 import { updateCoupon } from "../../store/coupons/couponThunks";
 import RichTextEditor from "../../components/AdminEditor";
+import { usePopup } from "../../components/PopupMessage/PopupContext";
 
 const formatDate = (date) => {
   if (!date) return "";
@@ -15,7 +16,7 @@ const EditCoupon = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+ const { popMessage } = usePopup();
   const coupon = state?.coupon;
 
   const {
@@ -84,7 +85,7 @@ const EditCoupon = () => {
 
       navigate("/coupons");
     } catch (err) {
-      alert(err);
+       popMessage("something went wrong")
     }
   };
 
@@ -115,8 +116,6 @@ const EditCoupon = () => {
             <option value="flat">Flat</option>
             <option value="freedelivery">Free Delivery</option>
           </select>
-
-          {/* Rich Text Description */}
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-600">
               Description

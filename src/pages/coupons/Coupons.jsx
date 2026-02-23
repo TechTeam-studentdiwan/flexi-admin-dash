@@ -9,6 +9,7 @@ import {
   updateCoupon,
 } from "../../store/coupons/couponThunks";
 import SideDrawer from "../../components/SideDrawer";
+import Spinner from "../../components/Spinner";
 
 const Coupons = () => {
   const dispatch = useDispatch();
@@ -67,7 +68,7 @@ const Coupons = () => {
 
         {/* Table */}
         {loading ? (
-          <p>Loading coupons...</p>
+          <Spinner color="black"/>
         ) : (
           <div className="bg-white shadow rounded-lg overflow-hidden">
             {coupons.length === 0 ? (

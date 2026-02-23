@@ -3,6 +3,7 @@ import Layout from "../../components/Layout";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getUsers } from "../../store/user/userThunks";
+import Spinner from "../../components/Spinner";
 
 const Customers = () => {
   const dispatch = useDispatch();
@@ -55,11 +56,11 @@ const Customers = () => {
           <div className="bg-red-100 text-red-600 p-4 rounded-lg">{error}</div>
         )}
 
-        {loading && (
+        {loading ? (
           <div className="text-gray-500 animate-pulse">
-            Loading customers...
+           <Spinner color="black"/>
           </div>
-        )}
+        ) :
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredUsers?.map((customer) => (
@@ -103,6 +104,7 @@ const Customers = () => {
             </div>
           ))}
         </div>
+        }
       </div>
     </Layout>
   );

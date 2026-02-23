@@ -6,6 +6,7 @@ import Layout from "../../components/Layout";
 import { updateProduct } from "../../store/products/productThunks";
 import RichTextEditor from "../../components/AdminEditor";
 import UploadCard from "../../components/UploadCard";
+import { usePopup } from "../../components/PopupMessage/PopupContext";
 const occasions = [
   "Ramadan",
   "Eid",
@@ -38,7 +39,7 @@ const EditProduct = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+ const { popMessage } = usePopup();
   const product = state?.product;
 
   const { register, handleSubmit, control, reset, watch, setValue } = useForm({
@@ -51,8 +52,6 @@ const EditProduct = () => {
   const sizesValue = watch("sizes");
 
   const [images, setImages] = useState([]);
-
-  // Load default data
   useEffect(() => {
     if (!product) {
       navigate("/products");
@@ -70,7 +69,6 @@ const EditProduct = () => {
         fitAdjustmentFee: product.fitAdjustmentFee || "",
       });
 
-      // Load images with index
       if (product.images?.length) {
         setImages(
           product.images.map((url, index) => ({
@@ -80,7 +78,6 @@ const EditProduct = () => {
         );
       }
 
-      // Load sizeChart
       if (product.sizeChart?.length) {
         product.sizeChart.forEach((item, index) => {
           setValue(`sizeChart.${index}.bust_max`, item.bust_max);
@@ -92,7 +89,6 @@ const EditProduct = () => {
     }
   }, [product, navigate, reset, setValue]);
 
-  // Image Handlers
   const handleAddImage = (url) => {
     if (!url) return;
     setImages((prev) => [...prev, { url, index: prev.length }]);
@@ -137,7 +133,6 @@ const EditProduct = () => {
 
       data.sizes = sizesArray;
 
-      // Build sizeChart properly
       if (data.sizeChart) {
         data.sizeChart = sizesArray.map((size, index) => ({
           size,
@@ -163,7 +158,7 @@ const EditProduct = () => {
 
       navigate("/products");
     } catch (err) {
-      alert(err);
+      popMessage("something went wrong")
     }
   };
 
@@ -220,7 +215,6 @@ const EditProduct = () => {
             className="w-full border p-2 rounded"
           />
 
-          {/* Dynamic Size Chart */}
           {sizesValue && (
             <div className="border p-4 rounded-lg bg-gray-50 space-y-4">
               <h3 className="font-semibold text-gray-700">Size Chart</h3>
@@ -280,7 +274,6 @@ const EditProduct = () => {
             </div>
           )}
 
-          {/* Images */}
           <UploadCard
             label="Add More Images"
             onChange={handleAddImage}
@@ -325,7 +318,6 @@ const EditProduct = () => {
             ))}
           </div>
 
-          {/* Fit Adjustment */}
           <div className="flex items-center gap-3">
             <input type="checkbox" {...register("fitAdjustmentEnabled")} />
             <label>Enable Fit Adjustment</label>
@@ -340,7 +332,6 @@ const EditProduct = () => {
             />
           )}
 
-          {/* Description */}
           <Controller
             name="description"
             control={control}

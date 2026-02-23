@@ -4,6 +4,7 @@ import Layout from "../../components/Layout";
 import { useNavigate } from "react-router-dom";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { getOffers, deleteOffer } from "../../store/offers/offerThunks";
+import Spinner from "../../components/Spinner";
 
 const Offers = () => {
   const dispatch = useDispatch();
@@ -24,7 +25,6 @@ const Offers = () => {
   return (
     <Layout>
       <div className=" mx-auto space-y-8">
-        {/* HEADER */}
         <div className="flex justify-between items-center">
           <h2 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
             Offers
@@ -38,10 +38,9 @@ const Offers = () => {
           </button>
         </div>
 
-        {/* TABLE */}
         <div className="bg-white rounded-2xl shadow border border-gray-100">
           {loading ? (
-            <div className="p-8 text-center">Loading...</div>
+            <div className="p-8 text-center"><Spinner color="black"/></div>
           ) : offers.length === 0 ? (
             <div className="p-8 text-center text-gray-400">
               No offers found.

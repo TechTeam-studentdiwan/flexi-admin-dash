@@ -6,13 +6,13 @@ import {
   updateOrderByAdminThunk,
 } from "../../store/orders/ordersThunks";
 import SideDrawer from "../../components/SideDrawer";
+import { usePopup } from "../../components/PopupMessage/PopupContext";
+import Spinner from "../../components/Spinner";
 
 const Orders = () => {
   const dispatch = useDispatch();
-
-  const { orders, loading, pagination } = useSelector(
-    (state) => state.orders
-  );
+  const { popMessage } = usePopup();
+  const { orders, loading, pagination } = useSelector((state) => state.orders);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -51,22 +51,22 @@ const Orders = () => {
     setSelectedOrder(null);
   };
 
-const handleUpdate = async () => {
-  console.log("Update button clicked");
-  console.log("Selected order:", selectedOrder);
+  const handleUpdate = async () => {
+    if (!selectedOrder) return;
 
-  if (!selectedOrder) return;
+    try {
+      await dispatch(
+        updateOrderByAdminThunk({
+          orderId: selectedOrder._id,
+          updateData,
+        }),
+      );
+    } catch (error) {
+      popMessage("something went wrong");
+    }
 
-  await dispatch(
-    updateOrderByAdminThunk({
-      orderId: selectedOrder._id,
-      updateData,
-    })
-  );
-
-  closeDetails();
-};
-
+    closeDetails();
+  };
 
   return (
     <Layout>
@@ -75,10 +75,11 @@ const handleUpdate = async () => {
           Orders Management
         </h2>
 
-
         <div className="bg-white shadow rounded-lg overflow-hidden">
           {loading ? (
-            <div className="p-6 text-center">Loading orders...</div>
+            <div className="p-6 text-center">
+              <Spinner color="black" />
+            </div>
           ) : (
             <table className="w-full border-collapse">
               <thead className="bg-gray-100 text-left">
@@ -87,7 +88,9 @@ const handleUpdate = async () => {
                   <th className="p-4 text-sm font-semibold">Total</th>
                   <th className="p-4 text-sm font-semibold">Order Status</th>
                   <th className="p-4 text-sm font-semibold">Payment</th>
-                  <th className="p-4 text-sm font-semibold">Estimated Delivery</th>
+                  <th className="p-4 text-sm font-semibold">
+                    Estimated Delivery
+                  </th>
                 </tr>
               </thead>
 
@@ -136,7 +139,6 @@ const handleUpdate = async () => {
             title="Order Details"
           >
             <div className="space-y-4 text-sm">
-
               {/* ADMIN UPDATE SECTION */}
               <div className="border p-4 rounded bg-gray-50">
                 <h3 className="font-semibold text-purple-700 mb-3">
@@ -145,9 +147,7 @@ const handleUpdate = async () => {
 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm mb-1">
-                      Order Status
-                    </label>
+                    <label className="block text-sm mb-1">Order Status</label>
                     <select
                       className="w-full border rounded p-2"
                       value={updateData.orderStatus}
@@ -167,9 +167,7 @@ const handleUpdate = async () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm mb-1">
-                      Payment Status
-                    </label>
+                    <label className="block text-sm mb-1">Payment Status</label>
                     <select
                       className="w-full border rounded p-2"
                       value={updateData.paymentStatus}
@@ -232,7 +230,7 @@ const handleUpdate = async () => {
                 <strong>Estimated Delivery:</strong>{" "}
                 {selectedOrder.estimatedDelivery
                   ? new Date(
-                      selectedOrder.estimatedDelivery
+                      selectedOrder.estimatedDelivery,
                     ).toLocaleDateString()
                   : "Not set"}
               </div>
@@ -245,13 +243,11 @@ const handleUpdate = async () => {
               </h3>
 
               <div>
-                <strong>Name:</strong>{" "}
-                {selectedOrder.shippingAddress.fullName}
+                <strong>Name:</strong> {selectedOrder.shippingAddress.fullName}
               </div>
 
               <div>
-                <strong>Phone:</strong>{" "}
-                {selectedOrder.shippingAddress.phone}
+                <strong>Phone:</strong> {selectedOrder.shippingAddress.phone}
               </div>
 
               <div>
@@ -271,9 +267,7 @@ const handleUpdate = async () => {
               <hr className="my-4" />
 
               {/* Items */}
-              <h3 className="font-semibold text-purple-700">
-                Ordered Items
-              </h3>
+              <h3 className="font-semibold text-purple-700">Ordered Items</h3>
 
               <div className="space-y-3">
                 {selectedOrder.items.map((item, index) => (
@@ -281,9 +275,7 @@ const handleUpdate = async () => {
                     <div className="font-medium">{item.name}</div>
                     <div>Size: {item.size}</div>
                     <div>Qty: {item.quantity}</div>
-                    <div>
-                      Price: {item.discountPrice || item.price}
-                    </div>
+                    <div>Price: {item.discountPrice || item.price}</div>
                   </div>
                 ))}
               </div>
@@ -291,9 +283,7 @@ const handleUpdate = async () => {
               <hr className="my-4" />
 
               {/* Payment Summary */}
-              <h3 className="font-semibold text-purple-700">
-                Payment Summary
-              </h3>
+              <h3 className="font-semibold text-purple-700">Payment Summary</h3>
 
               <div>Subtotal: {selectedOrder.subtotal}</div>
               <div>Discount: {selectedOrder.discount}</div>
@@ -304,8 +294,7 @@ const handleUpdate = async () => {
 
               {selectedOrder.couponCode && (
                 <div>
-                  <strong>Coupon:</strong>{" "}
-                  {selectedOrder.couponCode}
+                  <strong>Coupon:</strong> {selectedOrder.couponCode}
                 </div>
               )}
             </div>

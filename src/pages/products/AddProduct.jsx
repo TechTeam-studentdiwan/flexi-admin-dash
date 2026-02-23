@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { addProduct } from "../../store/products/productThunks";
 import RichTextEditor from "../../components/AdminEditor";
 import UploadCard from "../../components/UploadCard";
+import { usePopup } from "../../components/PopupMessage/PopupContext";
 const occasions = [
   "All",
   "Ramadan",
@@ -40,7 +41,7 @@ const AddProducts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { register, handleSubmit, reset, control, watch } = useForm();
-
+  const { popMessage } = usePopup();
   const { categories } = useSelector((state) => state.category);
 
   const fitAdjustmentEnabled = watch("fitAdjustmentEnabled");
@@ -118,7 +119,7 @@ const AddProducts = () => {
       setImages([]);
       navigate("/products");
     } catch (err) {
-      alert(err);
+      popMessage("something went wrong");
     }
   };
 

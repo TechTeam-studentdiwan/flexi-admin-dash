@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { getProducts, deleteProduct } from "../../store/products/productThunks";
 import SideDrawer from "../../components/SideDrawer";
+import Spinner from "../../components/Spinner";
 
 const Products = () => {
   const dispatch = useDispatch();
@@ -66,7 +67,7 @@ const Products = () => {
         </div>
 
         {loading ? (
-          <div className="animate-pulse text-gray-500">Loading products...</div>
+          <div className="animate-pulse text-gray-500"><Spinner color="black"/></div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {filteredProducts?.map((product) => (
@@ -139,7 +140,6 @@ const Products = () => {
             title="Product Details"
           >
             <div className="space-y-8">
-              {/* PRODUCT HEADER */}
               <div>
                 <h2 className="text-2xl font-bold capitalize text-gray-800">
                   {selectedProduct?.name}

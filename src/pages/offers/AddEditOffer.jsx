@@ -3,12 +3,13 @@ import { useDispatch } from "react-redux";
 import Layout from "../../components/Layout";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOffer, updateOffer } from "../../store/offers/offerThunks";
+import { usePopup } from "../../components/PopupMessage/PopupContext";
 
 const AddEditOffer = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { popMessage } = usePopup();
   const existing = location.state?.offer;
 
   const [formData, setFormData] = useState({
@@ -19,12 +20,16 @@ const AddEditOffer = () => {
   });
 
   const handleSubmit = async () => {
-    if (existing) {
-      await dispatch(updateOffer({ id: existing._id, data: formData }));
-    } else {
-      await dispatch(createOffer(formData));
+    try {
+      if (existing) {
+        await dispatch(updateOffer({ id: existing._id, data: formData }));
+      } else {
+        await dispatch(createOffer(formData));
+      }
+      navigate("/offers");
+    } catch (error) {
+      popMessage("something went wrong");
     }
-    navigate("/offers");
   };
 
   return (
@@ -59,9 +64,7 @@ const AddEditOffer = () => {
             type="text"
             placeholder="Link"
             value={formData.link}
-            onChange={(e) =>
-              setFormData({ ...formData, link: e.target.value })
-            }
+            onChange={(e) => setFormData({ ...formData, link: e.target.value })}
             className="w-full border p-3 rounded-lg"
           />
 

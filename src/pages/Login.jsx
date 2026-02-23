@@ -4,12 +4,15 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/auth/authThunks";
+import Spinner from "../components/Spinner";
+import { usePopup } from "../components/PopupMessage/PopupContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
-
+  const {loading} = useSelector(store=>store.auth)
+   const { popMessage } = usePopup();
   const {
     register,
     handleSubmit,
@@ -21,6 +24,7 @@ const Login = () => {
       await dispatch(loginUser(data)).unwrap();
       navigate("/dashboard");
     } catch (error) {
+      popMessage("something went wrong")
       console.log("something went wrong");
     }
   };
@@ -99,9 +103,9 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-white hover:bg-purple-200 text-black py-2.5 rounded-lg font-semibold transition duration-200 shadow-md hover:shadow-lg"
+            className="w-full bg-linear-to-r from-pink-500 to-purple-500 hover:bg-purple-200 text-white py-2.5 rounded-lg font-semibold transition duration-200 shadow-md hover:shadow-lg"
           >
-            Login
+           {loading ? <Spinner/> : "Login"} 
           </button>
         </form>
       </div>

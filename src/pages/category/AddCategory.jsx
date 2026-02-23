@@ -4,10 +4,11 @@ import Layout from "../../components/Layout";
 // import UploadCard from "../../components/common/UploadCard";
 import { addCategory } from "../../store/category/categoryThunks";
 import UploadCard from "../../components/UploadCard";
+import { usePopup } from "../../components/PopupMessage/PopupContext";
 
 const AddCategory = () => {
   const dispatch = useDispatch();
-
+  const { popMessage } = usePopup();
   const {
     register,
     handleSubmit,
@@ -30,7 +31,7 @@ const AddCategory = () => {
       await dispatch(addCategory(data)).unwrap();
       reset();
     } catch (err) {
-      alert(err);
+      popMessage("something went wrong");
     }
   };
 
@@ -46,7 +47,6 @@ const AddCategory = () => {
             onSubmit={handleSubmit(onSubmit)}
             className="space-y-5 border border-gray-400 p-4 rounded-lg"
           >
-            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
                 Category Name
@@ -64,15 +64,12 @@ const AddCategory = () => {
               )}
             </div>
 
-            {/* Upload Card */}
             <UploadCard
               label="Category Image"
               value={imageValue}
               onChange={(url) => setValue("image", url)}
               folder="categories"
             />
-
-            {/* Order */}
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-1">
                 Display Order
