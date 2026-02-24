@@ -13,6 +13,7 @@ const Customers = () => {
   const { user } = useSelector((state) => state.auth);
 
   const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("normal"); // ✅ new state
 
   useEffect(() => {
     if (user?._id) {
@@ -26,13 +27,20 @@ const Customers = () => {
     });
   };
 
-  const filteredUsers = users?.filter((u) =>
-    u.name?.toLowerCase().includes(search.toLowerCase()),
+  // ✅ Separate normal and guest users
+  const normalUsers = users?.filter((u) => !u.isGuest);
+  const guestUsers = users?.filter((u) => u.isGuest);
+
+  const activeUsers =
+    activeTab === "normal" ? normalUsers : guestUsers;
+
+  const filteredUsers = activeUsers?.filter((u) =>
+    u.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <Layout>
-      <div className=" mx-auto  space-y-8">
+      <div className="mx-auto space-y-8">
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
           <div>
             <h2 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
@@ -52,59 +60,88 @@ const Customers = () => {
           />
         </div>
 
+        <div className="flex gap-4 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("normal")}
+            className={`pb-2 font-medium ${
+              activeTab === "normal"
+                ? "border-b-2 border-purple-600 text-purple-600"
+                : "text-gray-500"
+            }`}
+          >
+            Normal Users
+          </button>
+
+          <button
+            onClick={() => setActiveTab("guest")}
+            className={`pb-2 font-medium ${
+              activeTab === "guest"
+                ? "border-b-2 border-purple-600 text-purple-600"
+                : "text-gray-500"
+            }`}
+          >
+            Guest Users
+          </button>
+        </div>
+
         {error && (
-          <div className="bg-red-100 text-red-600 p-4 rounded-lg">{error}</div>
+          <div className="bg-red-100 text-red-600 p-4 rounded-lg">
+            {error}
+          </div>
         )}
 
         {loading ? (
           <div className="text-gray-500 animate-pulse">
-           <Spinner color="black"/>
+            <Spinner color="black" />
           </div>
-        ) :
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredUsers?.map((customer) => (
+              <div
+                key={customer._id}
+                onClick={() => handleOpenUser(customer)}
+                className="group bg-white border border-gray-100 rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl font-bold text-white shadow">
+                    {customer.name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredUsers?.map((customer) => (
-            <div
-              key={customer._id}
-              onClick={() => handleOpenUser(customer)}
-              className="group bg-white border border-gray-100 rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-            >
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl font-bold text-white shadow">
-                  {customer.name?.charAt(0)?.toUpperCase() || "U"}
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-800 capitalize group-hover:text-purple-600 transition">
+                      {customer.name || "Unnamed User"}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {customer.email || "No Email"}
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="font-semibold text-lg text-gray-800 capitalize group-hover:text-purple-600 transition">
-                    {customer.name || "Unnamed User"}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {customer.email || "No Email"}
-                  </p>
+                <div className="border-t my-5"></div>
+
+                <div className="flex justify-between text-sm">
+                  <div>
+                    <span className="font-semibold text-gray-800">
+                      {customer.addresses?.length || 0}
+                    </span>
+                    <span className="text-gray-500 ml-1">
+                      Addresses
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="font-semibold text-purple-600">
+                      {customer.wishlist?.length || 0}
+                    </span>
+                    <span className="text-gray-500 ml-1">
+                      Wishlist
+                    </span>
+                  </div>
                 </div>
               </div>
-
-              <div className="border-t my-5"></div>
-
-              <div className="flex justify-between text-sm">
-                <div>
-                  <span className="font-semibold text-gray-800">
-                    {customer.addresses?.length || 0}
-                  </span>
-                  <span className="text-gray-500 ml-1">Addresses</span>
-                </div>
-
-                <div>
-                  <span className="font-semibold text-purple-600">
-                    {customer.wishlist?.length || 0}
-                  </span>
-                  <span className="text-gray-500 ml-1">Wishlist</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        }
+            ))}
+          </div>
+        )}
       </div>
     </Layout>
   );

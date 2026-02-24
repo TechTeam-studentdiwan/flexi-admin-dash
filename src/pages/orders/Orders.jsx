@@ -139,7 +139,6 @@ const Orders = () => {
             title="Order Details"
           >
             <div className="space-y-4 text-sm">
-              {/* ADMIN UPDATE SECTION */}
               <div className="border p-4 rounded bg-gray-50">
                 <h3 className="font-semibold text-purple-700 mb-3">
                   Admin Update Controls
@@ -148,13 +147,25 @@ const Orders = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm mb-1">Order Status</label>
+
                     <select
                       className="w-full border rounded p-2"
-                      value={updateData.orderStatus}
+                      value={
+                        [
+                          "pending",
+                          "processing",
+                          "shipped",
+                          "delivered",
+                          "cancelled",
+                        ].includes(updateData.orderStatus)
+                          ? updateData.orderStatus
+                          : "other"
+                      }
                       onChange={(e) =>
                         setUpdateData({
                           ...updateData,
-                          orderStatus: e.target.value,
+                          orderStatus:
+                            e.target.value === "other" ? "" : e.target.value,
                         })
                       }
                     >
@@ -163,7 +174,30 @@ const Orders = () => {
                       <option value="shipped">Shipped</option>
                       <option value="delivered">Delivered</option>
                       <option value="cancelled">Cancelled</option>
+                      <option value="other">Other</option>
                     </select>
+
+                    {/* Show input if not one of default statuses */}
+                    {![
+                      "pending",
+                      "processing",
+                      "shipped",
+                      "delivered",
+                      "cancelled",
+                    ].includes(updateData.orderStatus) && (
+                      <input
+                        type="text"
+                        placeholder="Enter custom status"
+                        className="w-full border rounded p-2 mt-2"
+                        value={updateData.orderStatus}
+                        onChange={(e) =>
+                          setUpdateData({
+                            ...updateData,
+                            orderStatus: e.target.value,
+                          })
+                        }
+                      />
+                    )}
                   </div>
 
                   <div>
@@ -212,8 +246,6 @@ const Orders = () => {
                 </div>
               </div>
 
-              {/* ---------------- EXISTING ORDER DETAILS (UNCHANGED) ---------------- */}
-
               <div>
                 <strong>Order ID:</strong> {selectedOrder._id}
               </div>
@@ -237,7 +269,6 @@ const Orders = () => {
 
               <hr className="my-4" />
 
-              {/* Customer */}
               <h3 className="font-semibold text-purple-700">
                 Customer Details
               </h3>
@@ -265,8 +296,6 @@ const Orders = () => {
               </div>
 
               <hr className="my-4" />
-
-              {/* Items */}
               <h3 className="font-semibold text-purple-700">Ordered Items</h3>
 
               <div className="space-y-3">
@@ -282,7 +311,6 @@ const Orders = () => {
 
               <hr className="my-4" />
 
-              {/* Payment Summary */}
               <h3 className="font-semibold text-purple-700">Payment Summary</h3>
 
               <div>Subtotal: {selectedOrder.subtotal}</div>
