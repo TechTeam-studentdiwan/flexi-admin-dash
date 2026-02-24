@@ -7,51 +7,23 @@ import { updateProduct } from "../../store/products/productThunks";
 import RichTextEditor from "../../components/AdminEditor";
 import UploadCard from "../../components/UploadCard";
 import { usePopup } from "../../components/PopupMessage/PopupContext";
-const occasions = [
-  "Ramadan",
-  "Eid",
-  "Wedding",
-  "Festive",
-  "Casual",
-  "Party Wear",
-  "Formal",
-  "Office Wear",
-  "Luxurious",
-  "Other",
-];
-
-const fabrics = [
-  "Cotton",
-  "Lawn",
-  "Silk",
-  "Georgette",
-  "Chiffon",
-  "Linen",
-  "Velvet",
-  "Rayon",
-  "Net",
-  "Organza",
-  "Pashmina",
-  "Other",
-];
 
 const EditProduct = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
- const { popMessage } = usePopup();
+  const { popMessage } = usePopup();
+
   const product = state?.product;
 
-  const { register, handleSubmit, control, reset, watch, setValue } = useForm({
-    defaultValues: {
-      fitAdjustmentEnabled: false,
-    },
-  });
+  const { register, handleSubmit, control, reset, watch, setValue } =
+    useForm();
 
   const fitAdjustmentEnabled = watch("fitAdjustmentEnabled");
   const sizesValue = watch("sizes");
 
   const [images, setImages] = useState([]);
+
   useEffect(() => {
     if (!product) {
       navigate("/products");
@@ -62,11 +34,18 @@ const EditProduct = () => {
         discountPrice: product.discountPrice || "",
         fabric: product.fabric || "",
         occasion: product.occasion || "",
-        sizes: product.sizes?.join(", ") || "",
+        subcategory: product.subcategory || "",
         stock: product.stock || "",
+        estimatedDeliveryDays: product.estimatedDeliveryDays || "",
+        sizes: product.sizes?.join(", ") || "",
+        tags: product.tags?.join(", ") || "",
+        whatsIncluded: product.whatsIncluded || "",
+        careInstructions: product.careInstructions || "",
         description: product.description || "",
         fitAdjustmentEnabled: product.fitAdjustmentEnabled || false,
         fitAdjustmentFee: product.fitAdjustmentFee || "",
+        codAvailable: product.codAvailable || false,
+        isActive: product.isActive ?? true,
       });
 
       if (product.images?.length) {
@@ -74,7 +53,7 @@ const EditProduct = () => {
           product.images.map((url, index) => ({
             url,
             index,
-          })),
+          }))
         );
       }
 
@@ -84,6 +63,8 @@ const EditProduct = () => {
           setValue(`sizeChart.${index}.waist_max`, item.waist_max);
           setValue(`sizeChart.${index}.hips_max`, item.hips_max);
           setValue(`sizeChart.${index}.shoulder_max`, item.shoulder_max);
+          setValue(`sizeChart.${index}.sleeve_length`, item.sleeve_length);
+          setValue(`sizeChart.${index}.dress_length`, item.dress_length);
         });
       }
     }
@@ -98,7 +79,7 @@ const EditProduct = () => {
     setImages((prev) =>
       prev
         .filter((_, i) => i !== indexToRemove)
-        .map((img, i) => ({ ...img, index: i })),
+        .map((img, i) => ({ ...img, index: i }))
     );
   };
 
@@ -106,13 +87,7 @@ const EditProduct = () => {
     const updated = [...images];
     const movedItem = updated.splice(oldIndex, 1)[0];
     updated.splice(newIndex, 0, movedItem);
-
-    const reIndexed = updated.map((img, i) => ({
-      ...img,
-      index: i,
-    }));
-
-    setImages(reIndexed);
+    setImages(updated.map((img, i) => ({ ...img, index: i })));
   };
 
   const onSubmit = async (data) => {
@@ -120,14 +95,25 @@ const EditProduct = () => {
       data.price = Number(data.price);
       data.discountPrice = Number(data.discountPrice);
       data.stock = Number(data.stock);
+      data.estimatedDeliveryDays = Number(data.estimatedDeliveryDays);
 
       data.fitAdjustmentEnabled = Boolean(data.fitAdjustmentEnabled);
       data.fitAdjustmentFee = data.fitAdjustmentEnabled
         ? Number(data.fitAdjustmentFee)
         : 0;
 
+      data.codAvailable = Boolean(data.codAvailable);
+      data.isActive = Boolean(data.isActive);
+
+      if (data.tags) {
+        data.tags = data.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+      }
+
       const sizesArray = data.sizes
-        .split(",")
+        ?.split(",")
         .map((s) => s.trim())
         .filter(Boolean);
 
@@ -140,6 +126,12 @@ const EditProduct = () => {
           waist_max: Number(data.sizeChart[index]?.waist_max || 0),
           hips_max: Number(data.sizeChart[index]?.hips_max || 0),
           shoulder_max: Number(data.sizeChart[index]?.shoulder_max || 0),
+          sleeve_length: Number(
+            data.sizeChart[index]?.sleeve_length || 0
+          ),
+          dress_length: Number(
+            data.sizeChart[index]?.dress_length || 0
+          ),
         }));
       } else {
         data.sizeChart = [];
@@ -153,12 +145,12 @@ const EditProduct = () => {
         updateProduct({
           id: product._id,
           data,
-        }),
+        })
       ).unwrap();
 
       navigate("/products");
     } catch (err) {
-      popMessage("something went wrong")
+      popMessage("Something went wrong");
     }
   };
 
@@ -166,8 +158,8 @@ const EditProduct = () => {
 
   return (
     <Layout>
-      <div className="mx-auto bg-white rounded">
-        <h2 className="text-2xl font-bold mb-6 text-purple-700">
+      <div className="mx-auto bg-white rounded space-y-5">
+        <h2 className="text-2xl font-bold text-purple-700">
           Edit Product
         </h2>
 
@@ -186,93 +178,65 @@ const EditProduct = () => {
             className="w-full border p-2 rounded"
           />
 
-          <select {...register("fabric")} className="w-full border p-2 rounded">
-            <option value="">Select Fabric</option>
-            {fabrics.map((fabric) => (
-              <option key={fabric} value={fabric}>
-                {fabric}
-              </option>
-            ))}
-          </select>
-
-          <select
-            {...register("occasion")}
+          <input
+            {...register("subcategory")}
+            placeholder="Subcategory"
             className="w-full border p-2 rounded"
-          >
-            <option value="">Select Occasion</option>
-            {occasions.map((occasion) => (
-              <option key={occasion} value={occasion}>
-                {occasion}
-              </option>
-            ))}
-          </select>
-
-          <input {...register("sizes")} className="w-full border p-2 rounded" />
+          />
 
           <input
             type="number"
             {...register("stock")}
+            placeholder="Stock"
             className="w-full border p-2 rounded"
           />
 
-          {sizesValue && (
-            <div className="border p-4 rounded-lg bg-gray-50 space-y-4">
-              <h3 className="font-semibold text-gray-700">Size Chart</h3>
+          <input
+            type="number"
+            {...register("estimatedDeliveryDays")}
+            placeholder="Estimated Delivery Days"
+            className="w-full border p-2 rounded"
+          />
 
-              {sizesValue
-                .split(",")
-                .map((size) => size.trim())
-                .filter(Boolean)
-                .map((size, index) => (
-                  <div
-                    key={index}
-                    className="border p-3 rounded bg-white space-y-2"
-                  >
-                    <h4 className="font-medium text-purple-700">
-                      Size: {size}
-                    </h4>
+          <input
+            {...register("tags")}
+            placeholder="Tags (comma separated)"
+            className="w-full border p-2 rounded"
+          />
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Bust Max"
-                        {...register(`sizeChart.${index}.bust_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
+          <input
+            {...register("whatsIncluded")}
+            placeholder="What's Included"
+            className="w-full border p-2 rounded"
+          />
 
-                      <input
-                        type="number"
-                        placeholder="Waist Max"
-                        {...register(`sizeChart.${index}.waist_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
+          <textarea
+            {...register("careInstructions")}
+            placeholder="Care Instructions"
+            className="w-full border p-2 rounded"
+          />
 
-                      <input
-                        type="number"
-                        placeholder="Hips Max"
-                        {...register(`sizeChart.${index}.hips_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
+          <input {...register("sizes")} className="w-full border p-2 rounded" />
 
-                      <input
-                        type="number"
-                        placeholder="Shoulder Max"
-                        {...register(`sizeChart.${index}.shoulder_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
-                    </div>
+          {/* Size Chart */}
+          {sizesValue &&
+            sizesValue
+              .split(",")
+              .map((size) => size.trim())
+              .filter(Boolean)
+              .map((size, index) => (
+                <div key={index} className="border p-3 rounded space-y-2">
+                  <h4>Size: {size}</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="number" placeholder="Bust Max" {...register(`sizeChart.${index}.bust_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                    <input type="number" placeholder="Waist Max" {...register(`sizeChart.${index}.waist_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                    <input type="number" placeholder="Hips Max" {...register(`sizeChart.${index}.hips_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                    <input type="number" placeholder="Shoulder Max" {...register(`sizeChart.${index}.shoulder_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                    <input type="number" placeholder="Sleeve Length" {...register(`sizeChart.${index}.sleeve_length`, { valueAsNumber: true })} className="border p-2 rounded" />
+                    <input type="number" placeholder="Dress Length" {...register(`sizeChart.${index}.dress_length`, { valueAsNumber: true })} className="border p-2 rounded" />
                   </div>
-                ))}
-            </div>
-          )}
+                </div>
+              ))}
 
           <UploadCard
             label="Add More Images"
@@ -282,38 +246,9 @@ const EditProduct = () => {
 
           <div className="grid grid-cols-4 gap-4">
             {images.map((img, index) => (
-              <div
-                key={index}
-                className="border rounded-lg p-2 relative bg-gray-50"
-              >
-                <img
-                  src={img.url}
-                  className="h-32 w-full object-cover rounded"
-                />
-
-                <div className="flex justify-between mt-2">
-                  <span>#{index}</span>
-                  <select
-                    value={index}
-                    onChange={(e) =>
-                      handleIndexChange(index, Number(e.target.value))
-                    }
-                  >
-                    {images.map((_, i) => (
-                      <option key={i} value={i}>
-                        {i}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"
-                >
-                  X
-                </button>
+              <div key={index} className="border p-2 rounded relative">
+                <img src={img.url} className="h-32 w-full object-cover rounded" />
+                <button type="button" onClick={() => handleRemoveImage(index)} className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded">X</button>
               </div>
             ))}
           </div>
@@ -324,13 +259,18 @@ const EditProduct = () => {
           </div>
 
           {fitAdjustmentEnabled && (
-            <input
-              type="number"
-              {...register("fitAdjustmentFee")}
-              className="w-full border p-2 rounded"
-              placeholder="Fit Adjustment Fee"
-            />
+            <input type="number" {...register("fitAdjustmentFee")} className="w-full border p-2 rounded" placeholder="Fit Adjustment Fee" />
           )}
+
+          <div className="flex items-center gap-3">
+            <input type="checkbox" {...register("codAvailable")} />
+            <label>COD Available</label>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input type="checkbox" {...register("isActive")} />
+            <label>Active Product</label>
+          </div>
 
           <Controller
             name="description"
@@ -344,7 +284,7 @@ const EditProduct = () => {
             )}
           />
 
-          <button className="bg-linear-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded">
+          <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded">
             Update Product
           </button>
         </form>

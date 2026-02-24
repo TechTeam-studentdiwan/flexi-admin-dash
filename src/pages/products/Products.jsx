@@ -67,7 +67,9 @@ const Products = () => {
         </div>
 
         {loading ? (
-          <div className="animate-pulse text-gray-500"><Spinner color="black"/></div>
+          <div className="animate-pulse text-gray-500">
+            <Spinner color="black" />
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {filteredProducts?.map((product) => (
@@ -140,19 +142,20 @@ const Products = () => {
             title="Product Details"
           >
             <div className="space-y-8">
+              {/* HEADER */}
               <div>
                 <h2 className="text-2xl font-bold capitalize text-gray-800">
                   {selectedProduct?.name}
                 </h2>
 
-                <div className="flex items-center gap-4 mt-3">
+                <div className="flex items-center gap-4 mt-3 flex-wrap">
                   <span className="text-2xl font-bold text-purple-600">
-                    ₹ {selectedProduct?.discountPrice || selectedProduct?.price}
+                    {selectedProduct?.discountPrice || selectedProduct?.price}
                   </span>
 
                   {selectedProduct?.discountPrice && (
                     <span className="text-sm line-through text-gray-400">
-                      ₹ {selectedProduct?.price}
+                      {selectedProduct?.price}
                     </span>
                   )}
 
@@ -165,6 +168,12 @@ const Products = () => {
                   >
                     {selectedProduct?.isActive ? "Active" : "Inactive"}
                   </span>
+
+                  {selectedProduct?.codAvailable && (
+                    <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
+                      COD Available
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -186,34 +195,54 @@ const Products = () => {
                 <div>
                   <strong>Category:</strong> {selectedProduct?.category?.name}
                 </div>
+
                 <div>
-                  <strong>Fabric:</strong> {selectedProduct?.fabric}
+                  <strong>Subcategory:</strong>{" "}
+                  {selectedProduct?.subcategory || "N/A"}
                 </div>
+
                 <div>
-                  <strong>Occasion:</strong> {selectedProduct?.occasion}
+                  <strong>Fabric:</strong> {selectedProduct?.fabric || "N/A"}
                 </div>
+
+                <div>
+                  <strong>Occasion:</strong>{" "}
+                  {selectedProduct?.occasion || "N/A"}
+                </div>
+
                 <div>
                   <strong>Stock:</strong> {selectedProduct?.stock ?? "N/A"}
                 </div>
+
+                <div>
+                  <strong>Estimated Delivery:</strong>{" "}
+                  {selectedProduct?.estimatedDeliveryDays
+                    ? `${selectedProduct.estimatedDeliveryDays} Days`
+                    : "N/A"}
+                </div>
+
                 <div>
                   <strong>Fit Adjustment:</strong>{" "}
                   {selectedProduct?.fitAdjustmentEnabled
                     ? "Enabled"
                     : "Disabled"}
                 </div>
+
                 {selectedProduct?.fitAdjustmentEnabled && (
                   <div>
-                    <strong>Fit Fee:</strong> ₹{" "}
+                    <strong>Fit Fee:</strong>{" "}
                     {selectedProduct?.fitAdjustmentFee}
                   </div>
                 )}
+
                 <div>
                   <strong>What's Included:</strong>{" "}
-                  {selectedProduct?.whatsIncluded}
+                  {selectedProduct?.whatsIncluded || "N/A"}
                 </div>
+
                 <div>
                   <strong>Care Instructions:</strong>{" "}
-                  {selectedProduct?.careInstructions}
+                  {selectedProduct?.careInstructions || "N/A"}
                 </div>
               </div>
 
@@ -262,21 +291,23 @@ const Products = () => {
               )}
 
               {/* SIZES */}
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-3">
-                  Available Sizes
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {selectedProduct?.sizes?.map((size) => (
-                    <span
-                      key={size}
-                      className="px-4 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
-                    >
-                      {size}
-                    </span>
-                  ))}
+              {selectedProduct?.sizes?.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-gray-800 mb-3">
+                    Available Sizes
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProduct.sizes.map((size) => (
+                      <span
+                        key={size}
+                        className="px-4 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
+                      >
+                        {size}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* SIZE CHART */}
               {selectedProduct?.sizeChart?.length > 0 && (
@@ -290,12 +321,12 @@ const Products = () => {
                       <thead className="bg-purple-50 text-purple-800">
                         <tr>
                           <th className="px-4 py-3 text-left">Size</th>
-                          <th className="px-4 py-3 text-left">Bust (Max)</th>
-                          <th className="px-4 py-3 text-left">Waist (Max)</th>
-                          <th className="px-4 py-3 text-left">Hips (Max)</th>
-                          <th className="px-4 py-3 text-left">
-                            Shoulder (Max)
-                          </th>
+                          <th className="px-4 py-3 text-left">Bust</th>
+                          <th className="px-4 py-3 text-left">Waist</th>
+                          <th className="px-4 py-3 text-left">Hips</th>
+                          <th className="px-4 py-3 text-left">Shoulder</th>
+                          <th className="px-4 py-3 text-left">Sleeve</th>
+                          <th className="px-4 py-3 text-left">Dress Length</th>
                         </tr>
                       </thead>
 
@@ -312,6 +343,12 @@ const Products = () => {
                             <td className="px-4 py-3">{item.waist_max}</td>
                             <td className="px-4 py-3">{item.hips_max}</td>
                             <td className="px-4 py-3">{item.shoulder_max}</td>
+                            <td className="px-4 py-3">
+                              {item.sleeve_length || "-"}
+                            </td>
+                            <td className="px-4 py-3">
+                              {item.dress_length || "-"}
+                            </td>
                           </tr>
                         ))}
                       </tbody>

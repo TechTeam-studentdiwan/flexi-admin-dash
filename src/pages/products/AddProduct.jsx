@@ -7,35 +7,6 @@ import { addProduct } from "../../store/products/productThunks";
 import RichTextEditor from "../../components/AdminEditor";
 import UploadCard from "../../components/UploadCard";
 import { usePopup } from "../../components/PopupMessage/PopupContext";
-const occasions = [
-  "All",
-  "Ramadan",
-  "Eid",
-  "Wedding",
-  "Festive",
-  "Casual",
-  "Party Wear",
-  "Formal",
-  "Office Wear",
-  "luxurious",
-  "other",
-];
-
-const fabrics = [
-  "All",
-  "Cotton",
-  "Lawn",
-  "Silk",
-  "Georgette",
-  "Chiffon",
-  "Linen",
-  "Velvet",
-  "Rayon",
-  "Net",
-  "Organza",
-  "Pashmina",
-  "other",
-];
 
 const AddProducts = () => {
   const dispatch = useDispatch();
@@ -49,54 +20,54 @@ const AddProducts = () => {
 
   const [images, setImages] = useState([]);
 
-  // Add Image
   const handleAddImage = (url) => {
     if (!url) return;
     setImages((prev) => [...prev, { url, index: prev.length }]);
   };
 
-  // Remove Image
   const handleRemoveImage = (indexToRemove) => {
     setImages((prev) =>
       prev
         .filter((_, i) => i !== indexToRemove)
-        .map((img, i) => ({ ...img, index: i })),
+        .map((img, i) => ({ ...img, index: i }))
     );
   };
 
-  // Change Image Index
   const handleIndexChange = (oldIndex, newIndex) => {
     const updated = [...images];
     const movedItem = updated.splice(oldIndex, 1)[0];
     updated.splice(newIndex, 0, movedItem);
-
-    const reIndexed = updated.map((img, i) => ({
-      ...img,
-      index: i,
-    }));
-
-    setImages(reIndexed);
+    setImages(updated.map((img, i) => ({ ...img, index: i })));
   };
 
   const onSubmit = async (data) => {
     try {
       data.price = Number(data.price);
       data.discountPrice = Number(data.discountPrice);
+      data.stock = Number(data.stock);
+      data.estimatedDeliveryDays = Number(data.estimatedDeliveryDays);
 
       data.fitAdjustmentEnabled = Boolean(data.fitAdjustmentEnabled);
       data.fitAdjustmentFee = data.fitAdjustmentEnabled
         ? Number(data.fitAdjustmentFee)
         : 0;
 
-      // Convert sizes string to array
+      data.codAvailable = Boolean(data.codAvailable);
+      data.isActive = data.isActive !== false;
+
+      if (data.tags) {
+        data.tags = data.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean);
+      }
+
       const sizesArray = data.sizes
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+        ? data.sizes.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
 
       data.sizes = sizesArray;
 
-      // Build sizeChart properly
       if (data.sizeChart) {
         data.sizeChart = sizesArray.map((size, index) => ({
           size,
@@ -104,6 +75,8 @@ const AddProducts = () => {
           waist_max: Number(data.sizeChart[index]?.waist_max || 0),
           hips_max: Number(data.sizeChart[index]?.hips_max || 0),
           shoulder_max: Number(data.sizeChart[index]?.shoulder_max || 0),
+          sleeve_length: Number(data.sizeChart[index]?.sleeve_length || 0),
+          dress_length: Number(data.sizeChart[index]?.dress_length || 0),
         }));
       } else {
         data.sizeChart = [];
@@ -119,7 +92,7 @@ const AddProducts = () => {
       setImages([]);
       navigate("/products");
     } catch (err) {
-      popMessage("something went wrong");
+      popMessage("Something went wrong");
     }
   };
 
@@ -132,208 +105,106 @@ const AddProducts = () => {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="border border-gray-400 p-6 rounded-lg space-y-5"
+          className="border border-gray-300 p-6 rounded-lg space-y-5"
         >
-          {/* Product Name */}
-          <input
-            {...register("name")}
-            placeholder="Product Name"
-            className="w-full border p-2 rounded"
-          />
+          <input {...register("name")} placeholder="Product Name" className="w-full border p-2 rounded" />
 
-          {/* Category */}
-          <select
-            {...register("category", { required: true })}
-            className="w-full border p-2 rounded"
-          >
+          <select {...register("category", { required: true })} className="w-full border p-2 rounded">
             <option value="">Select Category</option>
             {categories?.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
+              <option key={cat._id} value={cat._id}>{cat.name}</option>
             ))}
           </select>
 
-          {/* Description */}
+          <input {...register("subcategory")} placeholder="Subcategory" className="w-full border p-2 rounded" />
+
           <Controller
             name="description"
             control={control}
             defaultValue=""
             render={({ field }) => (
-              <RichTextEditor
-                value={field.value}
-                onChange={field.onChange}
-                minHeight={250}
-              />
+              <RichTextEditor value={field.value} onChange={field.onChange} minHeight={250} />
             )}
           />
 
-          {/* Image Upload */}
-          <UploadCard
-            label="Product Images"
-            onChange={handleAddImage}
-            folder="products"
-          />
+          <UploadCard label="Product Images" onChange={handleAddImage} folder="products" />
 
-          {/* Image Preview */}
           <div className="grid grid-cols-4 gap-4 mt-4">
             {images.map((img, index) => (
-              <div
-                key={index}
-                className="border rounded-lg p-2 relative bg-gray-50"
-              >
-                <img
-                  src={img.url}
-                  alt=""
-                  className="h-32 w-full object-cover rounded"
-                />
-
+              <div key={index} className="border rounded-lg p-2 relative bg-gray-50">
+                <img src={img.url} alt="" className="h-32 w-full object-cover rounded" />
                 <div className="flex justify-between mt-2">
                   <span>#{index}</span>
-
-                  <select
-                    value={index}
-                    onChange={(e) =>
-                      handleIndexChange(index, Number(e.target.value))
-                    }
-                    className="border text-sm"
-                  >
+                  <select value={index} onChange={(e) => handleIndexChange(index, Number(e.target.value))} className="border text-sm">
                     {images.map((_, i) => (
-                      <option key={i} value={i}>
-                        {i}
-                      </option>
+                      <option key={i} value={i}>{i}</option>
                     ))}
                   </select>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded"
-                >
-                  X
-                </button>
+                <button type="button" onClick={() => handleRemoveImage(index)} className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded">X</button>
               </div>
             ))}
           </div>
 
-          {/* Price */}
-          <input
-            type="number"
-            {...register("price")}
-            placeholder="Price"
-            className="w-full border p-2 rounded"
-          />
+          <input type="number" {...register("price")} placeholder="Price" className="w-full border p-2 rounded" />
+          <input type="number" {...register("discountPrice")} placeholder="Discount Price" className="w-full border p-2 rounded" />
+          <input type="number" {...register("stock")} placeholder="Stock Quantity" className="w-full border p-2 rounded" />
+          <input type="number" {...register("estimatedDeliveryDays")} placeholder="Estimated Delivery (Days)" className="w-full border p-2 rounded" />
 
-          <input
-            type="number"
-            {...register("discountPrice")}
-            placeholder="Discount Price"
-            className="w-full border p-2 rounded"
-          />
+          <input {...register("tags")} placeholder="Tags (comma separated)" className="w-full border p-2 rounded" />
+
+          <input {...register("whatsIncluded")} placeholder="What's Included" className="w-full border p-2 rounded" />
+
+          <textarea {...register("careInstructions")} placeholder="Care Instructions" className="w-full border p-2 rounded" />
 
           <select {...register("fabric")} className="w-full border p-2 rounded">
             <option value="">Select Fabric</option>
-            {fabrics.map((fabric) => (
-              <option key={fabric} value={fabric}>
-                {fabric}
-              </option>
-            ))}
+            <option>Cotton</option>
+            <option>Silk</option>
+            <option>Chiffon</option>
           </select>
 
-          <select
-            {...register("occasion")}
-            className="w-full border p-2 rounded"
-          >
+          <select {...register("occasion")} className="w-full border p-2 rounded">
             <option value="">Select Occasion</option>
-            {occasions.map((occasion) => (
-              <option key={occasion} value={occasion}>
-                {occasion}
-              </option>
-            ))}
+            <option>Ramadan</option>
+            <option>Eid</option>
+            <option>Wedding</option>
           </select>
 
-          {/* Sizes */}
-          <input
-            {...register("sizes")}
-            placeholder="S, M, L"
-            className="w-full border p-2 rounded"
-          />
+          <input {...register("sizes")} placeholder="S, M, L" className="w-full border p-2 rounded" />
 
-          {/* Dynamic Size Chart */}
-          {sizesValue && (
-            <div className="border p-4 rounded-lg bg-gray-50 space-y-4">
-              <h3 className="font-semibold text-gray-700">Size Chart</h3>
-
-              {sizesValue
-                .split(",")
-                .map((size) => size.trim())
-                .filter(Boolean)
-                .map((size, index) => (
-                  <div
-                    key={index}
-                    className="border p-3 rounded bg-white space-y-2"
-                  >
-                    <h4 className="font-medium text-purple-700">
-                      Size: {size}
-                    </h4>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Bust Max"
-                        {...register(`sizeChart.${index}.bust_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Waist Max"
-                        {...register(`sizeChart.${index}.waist_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Hips Max"
-                        {...register(`sizeChart.${index}.hips_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Shoulder Max"
-                        {...register(`sizeChart.${index}.shoulder_max`, {
-                          valueAsNumber: true,
-                        })}
-                        className="border p-2 rounded"
-                      />
-                    </div>
-                  </div>
-                ))}
+          {sizesValue && sizesValue.split(",").map((size, index) => (
+            <div key={index} className="border p-3 rounded bg-white space-y-2">
+              <h4 className="font-medium text-purple-700">Size: {size.trim()}</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <input type="number" placeholder="Bust Max" {...register(`sizeChart.${index}.bust_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                <input type="number" placeholder="Waist Max" {...register(`sizeChart.${index}.waist_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                <input type="number" placeholder="Hips Max" {...register(`sizeChart.${index}.hips_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                <input type="number" placeholder="Shoulder Max" {...register(`sizeChart.${index}.shoulder_max`, { valueAsNumber: true })} className="border p-2 rounded" />
+                <input type="number" placeholder="Sleeve Length" {...register(`sizeChart.${index}.sleeve_length`, { valueAsNumber: true })} className="border p-2 rounded" />
+                <input type="number" placeholder="Dress Length" {...register(`sizeChart.${index}.dress_length`, { valueAsNumber: true })} className="border p-2 rounded" />
+              </div>
             </div>
-          )}
+          ))}
 
-          {/* Fit Adjustment */}
           <div className="flex items-center gap-3">
             <input type="checkbox" {...register("fitAdjustmentEnabled")} />
             <label>Enable Fit Adjustment</label>
           </div>
 
           {fitAdjustmentEnabled && (
-            <input
-              type="number"
-              {...register("fitAdjustmentFee")}
-              placeholder="Fit Adjustment Fee"
-              className="w-full border p-2 rounded"
-            />
+            <input type="number" {...register("fitAdjustmentFee")} placeholder="Fit Adjustment Fee" className="w-full border p-2 rounded" />
           )}
+
+          <div className="flex items-center gap-3">
+            <input type="checkbox" {...register("codAvailable")} />
+            <label>Cash On Delivery Available</label>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input type="checkbox" {...register("isActive")} defaultChecked />
+            <label>Active Product</label>
+          </div>
 
           <button className="bg-linear-to-r from-pink-500 to-purple-500 text-white px-6 py-2 rounded">
             Save Product
