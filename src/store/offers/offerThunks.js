@@ -1,13 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-const BASE_URL = "http://localhost:8080/offers";
+import {BACKEND_URL} from "../url"
 
 export const getOffers = createAsyncThunk(
   "offers/getAll",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`${BASE_URL}/all`, { withCredentials: true });
+      const res = await axios.get(`${BACKEND_URL}/offers/all`, { withCredentials: true });
       return res.data.offers;
     } catch (err) {
       return rejectWithValue("Failed to fetch offers");
@@ -19,7 +18,7 @@ export const createOffer = createAsyncThunk(
   "offers/create",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${BASE_URL}/create`, data, {
+      const res = await axios.post(`${BACKEND_URL}/offers/create`, data, {
         withCredentials: true,
       });
       return res.data.offer;
@@ -33,7 +32,7 @@ export const updateOffer = createAsyncThunk(
   "offers/update",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const res = await axios.put(`${BASE_URL}/update/${id}`, data, {
+      const res = await axios.put(`${BACKEND_URL}/offers/update/${id}`, data, {
         withCredentials: true,
       });
       return res.data.offer;
@@ -47,7 +46,7 @@ export const deleteOffer = createAsyncThunk(
   "offers/delete",
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/delete/${id}`, { withCredentials: true });
+      await axios.delete(`${BACKEND_URL}/offers/delete/${id}`, { withCredentials: true });
       return id;
     } catch (err) {
       return rejectWithValue("Failed to delete offer");

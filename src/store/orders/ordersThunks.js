@@ -1,15 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import {BACKEND_URL} from "../url"
 
-const BASE_URL = "https://flexiibackend.up.railway.app/orders"; // change if needed
-
-// 🔹 Get All Orders (Admin)
 export const getAllOrders = createAsyncThunk(
   "orders/getAllOrders",
   async (params = {}, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${BASE_URL}/getallorders`, {
-        params, // sends query params automatically
+      const response = await axios.get(`${BACKEND_URL}/orders/getallorders`, {
+        params, 
         withCredentials: true,
       });
 
@@ -28,10 +26,10 @@ export const updateOrderByAdminThunk = createAsyncThunk(
   async ({ orderId, updateData }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        `${BASE_URL}/update/${orderId}`,
+        `${BACKEND_URL}/orders/update/${orderId}`,
         updateData,
         {
-          withCredentials: true, // if you use cookies auth
+          withCredentials: true, 
         }
       );
 

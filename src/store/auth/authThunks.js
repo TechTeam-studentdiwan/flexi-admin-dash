@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import {BACKEND_URL} from "../url"
 
-const BACKEND_URL = "https://flexiibackend.up.railway.app";
 
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
