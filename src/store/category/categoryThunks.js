@@ -1,14 +1,13 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-const BASE_URL = "https://flexiibackend.up.railway.app/categories";
+import {BACKEND_URL} from "../url"
 
 // ================= GET =================
 export const getCategories = createAsyncThunk(
   "category/getCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`${BASE_URL}/getcatagories`, {
+      const res = await axios.get(`${BACKEND_URL}/categories/getcatagories`, {
         withCredentials: true,
       });
       return res.data.categories;
@@ -25,7 +24,7 @@ export const addCategory = createAsyncThunk(
   "category/addCategory",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${BASE_URL}/add`, data, {
+      const res = await axios.post(`${BACKEND_URL}/categories/add`, data, {
         withCredentials: true,
       });
       return res.data.category;
@@ -43,7 +42,7 @@ export const updateCategory = createAsyncThunk(
   async ({ id, data }, { rejectWithValue }) => {
     try {
       const res = await axios.put(
-        `${BASE_URL}/update/${id}`,
+        `${BACKEND_URL}/categories/update/${id}`,
         data,
         { withCredentials: true }
       );
@@ -61,7 +60,7 @@ export const deleteCategory = createAsyncThunk(
   "category/deleteCategory",
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/delete/${id}`, {
+      await axios.delete(`${BACKEND_URL}/categories/delete/${id}`, {
         withCredentials: true,
       });
       return id;

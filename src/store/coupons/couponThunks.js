@@ -1,13 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-const BASE_URL = "https://flexiibackend.up.railway.app/coupons";
+import {BACKEND_URL} from "../url"
 
 export const getCoupons = createAsyncThunk(
   "coupon/getCoupons",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get(`${BASE_URL}/get-coupons`, {
+      const res = await axios.get(`${BACKEND_URL}/coupons/get-coupons`, {
         withCredentials: true,
       });
       return res.data.coupons;
@@ -24,7 +23,7 @@ export const createCoupon = createAsyncThunk(
   "coupon/createCoupon",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${BASE_URL}/create`, data, {
+      const res = await axios.post(`${BACKEND_URL}/coupons/create`, data, {
         withCredentials: true,
       });
       return res.data.coupon;
@@ -41,7 +40,7 @@ export const updateCoupon = createAsyncThunk(
   "coupon/updateCoupon",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const res = await axios.put(`${BASE_URL}/update/${id}`, data, {
+      const res = await axios.put(`${BACKEND_URL}/coupons/update/${id}`, data, {
         withCredentials: true,
       });
       return res.data.coupon;
@@ -58,7 +57,7 @@ export const deleteCoupon = createAsyncThunk(
   "coupon/deleteCoupon",
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${BASE_URL}/delete/${id}`, {
+      await axios.delete(`${BACKEND_URL}/coupons/delete/${id}`, {
         withCredentials: true,
       });
       return id;
@@ -75,7 +74,7 @@ export const validateCoupon = createAsyncThunk(
   "coupon/validateCoupon",
   async (data, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${BASE_URL}/validate`, data, {
+      const res = await axios.post(`${BACKEND_URL}/coupons/validate`, data, {
         withCredentials: true,
       });
       return res.data;

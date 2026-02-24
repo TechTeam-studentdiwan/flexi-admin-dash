@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-const BASE_URL = "https://flexiibackend.up.railway.app/user";
+import {BACKEND_URL} from "../url"
 
 export const getUsers = createAsyncThunk(
   "users/getUsers",
@@ -16,7 +15,7 @@ export const getUsers = createAsyncThunk(
         ...(isAdmin !== undefined && { isAdmin }),
       }).toString();
 
-      const res = await axios.get(`${BASE_URL}/get-users?${query}`,{withCredentials:true});
+      const res = await axios.get(`${BACKEND_URL}/user/get-users?${query}`,{withCredentials:true});
 
       return res.data;
     } catch (err) {
@@ -34,7 +33,7 @@ export const getDashboardOverview = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-        `${BASE_URL}/get-dashboard-overview`,{withCredentials:true}
+        `${BACKEND_URL}/user/get-dashboard-overview`,{withCredentials:true}
       );
 
       return res.data.data;

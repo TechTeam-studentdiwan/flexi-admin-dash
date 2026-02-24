@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { useSelector, useDispatch } from "react-redux";
 import { updateUserProfileThunk } from "../store/auth/authThunks";
+import RichTextEditor from "../components/AdminEditor";
+// import RichTextEditor from "../components/RichTextEditor"; // ✅ added
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -16,6 +18,7 @@ const Profile = () => {
     deliveryfee: user?.deliveryfee || 0,
     currentPassword: "",
     newPassword: "",
+    terms: user?.terms || "", // ✅ added
   });
 
   if (!user) return null;
@@ -33,6 +36,10 @@ const Profile = () => {
       payload.newPassword = formData.newPassword;
     }
 
+    if (user.isAdmin) {
+      payload.terms = formData.terms; // ✅ added
+    }
+
     await dispatch(
       updateUserProfileThunk({
         userId: user._id,
@@ -45,7 +52,7 @@ const Profile = () => {
 
   return (
     <Layout>
-      <div className=" mx-auto">
+      <div className="mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-linear-to-r from-pink-500 to-purple-600 p-8 text-white">
             <h2 className="text-3xl font-bold">My Profile</h2>
@@ -61,12 +68,23 @@ const Profile = () => {
               </h3>
 
               {!isEditing ? (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-linear-to-r from-pink-500 to-purple-600 text-white px-5 py-2 rounded-lg hover:opacity-90 transition"
-                >
-                  Edit Profile
-                </button>
+                <div className="flex gap-3">
+                  {user.isAdmin && (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg hover:bg-purple-200 transition"
+                    >
+                      Add Terms & Conditions
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="bg-linear-to-r from-pink-500 to-purple-600 text-white px-5 py-2 rounded-lg hover:opacity-90 transition"
+                  >
+                    Edit Profile
+                  </button>
+                </div>
               ) : (
                 <div className="flex gap-3">
                   <button
@@ -101,7 +119,6 @@ const Profile = () => {
                 />
               </div>
 
-              {/* Email */}
               <div>
                 <label className="text-sm text-gray-500">Email</label>
                 <input
@@ -158,47 +175,66 @@ const Profile = () => {
             </div>
 
             {isEditing && (
-              <div className="border-t pt-6 mt-6 space-y-4">
-                <h4 className="text-lg font-semibold text-gray-800">
-                  Change Password
-                </h4>
+              <>
+                <div className="border-t pt-6 mt-6 space-y-4">
+                  <h4 className="text-lg font-semibold text-gray-800">
+                    Change Password
+                  </h4>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-sm text-gray-500">
-                      Current Password
-                    </label>
-                    <input
-                      type="password"
-                      value={formData.currentPassword}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          currentPassword: e.target.value,
-                        })
-                      }
-                      className="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-purple-500"
-                    />
-                  </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm text-gray-500">
+                        Current Password
+                      </label>
+                      <input
+                        type="password"
+                        value={formData.currentPassword}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            currentPassword: e.target.value,
+                          })
+                        }
+                        className="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="text-sm text-gray-500">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={formData.newPassword}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          newPassword: e.target.value,
-                        })
-                      }
-                      className="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-purple-500"
-                    />
+                    <div>
+                      <label className="text-sm text-gray-500">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={formData.newPassword}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            newPassword: e.target.value,
+                          })
+                        }
+                        className="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                {/* ✅ Terms Section Added */}
+                {user.isAdmin && (
+                  <div className="border-t pt-6 mt-6 space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-800">
+                      Terms & Conditions
+                    </h4>
+
+                    <RichTextEditor
+                      value={formData.terms}
+                      onChange={(value) =>
+                        setFormData({ ...formData, terms: value })
+                      }
+                      minHeight={250}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
