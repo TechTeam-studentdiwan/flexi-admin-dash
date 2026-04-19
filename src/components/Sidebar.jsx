@@ -9,6 +9,8 @@ import {
   FaUserCircle,
   FaSignOutAlt,
   FaAddressBook,
+  FaMapMarkerAlt,
+  FaFileAlt,
 } from "react-icons/fa";
 import { TbCategory, TbRulerMeasure } from "react-icons/tb";
 import { RiCoupon2Fill, RiDiscountPercentFill } from "react-icons/ri";
@@ -41,6 +43,8 @@ const Sidebar = () => {
     // { name: "Measurements", path: "/measurements", icon: <TbRulerMeasure /> },
     { name: "Customers", path: "/customers", icon: <FaUsers /> },
     { name: "Offers", path: "/offers", icon: <RiDiscountPercentFill /> },
+    { name: "Delivery Areas", path: "/areas", icon: <FaMapMarkerAlt /> },
+    { name: "Terms & Policies", path: "/terms-pages", icon: <FaFileAlt /> },
     // { name: "Analytics", path: "/analytics", icon: <FaChartLine /> },
   ];
 

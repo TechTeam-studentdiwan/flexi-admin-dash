@@ -21,6 +21,8 @@ import EditCoupon from "./pages/coupons/EditCoupon";
 import CustomerDetails from "./pages/customers/CustomerDetails";
 import Offers from "./pages/offers/Offers";
 import AddEditOffer from "./pages/offers/AddEditOffer";
+import Areas from "./pages/areas/Areas";
+import TermsPages from "./pages/terms/TermsPages";
 
 const App = () => {
   return (
@@ -181,6 +183,24 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <AddEditOffer />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/areas"
+            element={
+              <ProtectedRoute>
+                <Areas />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/terms-pages"
+            element={
+              <ProtectedRoute>
+                <TermsPages />
               </ProtectedRoute>
             }
           />
