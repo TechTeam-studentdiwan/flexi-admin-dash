@@ -12,7 +12,7 @@ import {
   FaMapMarkerAlt,
   FaFileAlt,
 } from "react-icons/fa";
-import { TbCategory, TbRulerMeasure } from "react-icons/tb";
+import { TbCategory, TbRulerMeasure, TbBook } from "react-icons/tb";
 import { RiCoupon2Fill, RiDiscountPercentFill } from "react-icons/ri";
 import { persistor } from "../store/store";
 import { useDispatch } from "react-redux";
@@ -45,6 +45,7 @@ const Sidebar = () => {
     { name: "Offers", path: "/offers", icon: <RiDiscountPercentFill /> },
     { name: "Delivery Areas", path: "/areas", icon: <FaMapMarkerAlt /> },
     { name: "Terms & Policies", path: "/terms-pages", icon: <FaFileAlt /> },
+    { name: "Measure Guide", path: "/measurement-guide", icon: <TbBook /> },
     // { name: "Analytics", path: "/analytics", icon: <FaChartLine /> },
   ];
 

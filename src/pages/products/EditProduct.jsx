@@ -216,6 +216,36 @@ const EditProduct = () => {
             className="w-full border p-2 rounded"
           />
 
+          <select {...register("fabric")} className="w-full border p-2 rounded">
+            <option value="">Select Fabric / Cloth Type</option>
+            <option value="Cotton">Cotton</option>
+            <option value="Lawn">Lawn</option>
+            <option value="Silk">Silk</option>
+            <option value="Georgette">Georgette</option>
+            <option value="Chiffon">Chiffon</option>
+            <option value="Linen">Linen</option>
+            <option value="Velvet">Velvet</option>
+            <option value="Rayon">Rayon</option>
+            <option value="Net">Net</option>
+            <option value="Organza">Organza</option>
+            <option value="Pashmina">Pashmina</option>
+            <option value="other">Other</option>
+          </select>
+
+          <select {...register("occasion")} className="w-full border p-2 rounded">
+            <option value="">Select Occasion</option>
+            <option value="Ramadan">Ramadan</option>
+            <option value="Eid">Eid</option>
+            <option value="Wedding">Wedding</option>
+            <option value="Festive">Festive</option>
+            <option value="Casual">Casual</option>
+            <option value="Party Wear">Party Wear</option>
+            <option value="Formal">Formal</option>
+            <option value="Office Wear">Office Wear</option>
+            <option value="luxurious">Luxurious</option>
+            <option value="other">Other</option>
+          </select>
+
           <input {...register("sizes")} className="w-full border p-2 rounded" />
 
           {/* Size Chart */}

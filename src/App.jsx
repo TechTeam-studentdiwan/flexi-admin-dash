@@ -23,6 +23,7 @@ import Offers from "./pages/offers/Offers";
 import AddEditOffer from "./pages/offers/AddEditOffer";
 import Areas from "./pages/areas/Areas";
 import TermsPages from "./pages/terms/TermsPages";
+import MeasurementGuide from "./pages/guide/MeasurementGuide";
 
 const App = () => {
   return (
@@ -201,6 +202,15 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <TermsPages />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/measurement-guide"
+            element={
+              <ProtectedRoute>
+                <MeasurementGuide />
               </ProtectedRoute>
             }
           />
