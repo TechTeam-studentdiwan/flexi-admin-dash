@@ -21,6 +21,8 @@ const EditProduct = () => {
 
   const fitAdjustmentEnabled = watch("fitAdjustmentEnabled");
   const sizesValue = watch("sizes");
+  const fabricVal = watch("fabric");
+  const occasionVal = watch("occasion");
 
   const [images, setImages] = useState([]);
 
@@ -104,6 +106,11 @@ const EditProduct = () => {
 
       data.codAvailable = Boolean(data.codAvailable);
       data.isActive = Boolean(data.isActive);
+
+      if (data.fabric === "other" && data.customFabric?.trim()) data.fabric = data.customFabric.trim();
+      delete data.customFabric;
+      if (data.occasion === "other" && data.customOccasion?.trim()) data.occasion = data.customOccasion.trim();
+      delete data.customOccasion;
 
       if (data.tags) {
         data.tags = data.tags
@@ -231,6 +238,9 @@ const EditProduct = () => {
             <option value="Pashmina">Pashmina</option>
             <option value="other">Other</option>
           </select>
+          {fabricVal === "other" && (
+            <input {...register("customFabric")} placeholder="Type custom fabric type..." className="w-full border p-2 rounded mt-1" />
+          )}
 
           <select {...register("occasion")} className="w-full border p-2 rounded">
             <option value="">Select Occasion</option>
@@ -245,6 +255,9 @@ const EditProduct = () => {
             <option value="luxurious">Luxurious</option>
             <option value="other">Other</option>
           </select>
+          {occasionVal === "other" && (
+            <input {...register("customOccasion")} placeholder="Type custom occasion..." className="w-full border p-2 rounded mt-1" />
+          )}
 
           <input {...register("sizes")} className="w-full border p-2 rounded" />
 
