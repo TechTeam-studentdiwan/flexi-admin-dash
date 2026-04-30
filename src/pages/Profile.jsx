@@ -18,7 +18,9 @@ const Profile = () => {
     deliveryfee: user?.deliveryfee || 0,
     currentPassword: "",
     newPassword: "",
-    terms: user?.terms || "", // ✅ added
+    terms: user?.terms || "",
+    supportEmail: user?.supportEmail || "",
+    supportWhatsapp: user?.supportWhatsapp || "",
   });
 
   if (!user) return null;
@@ -37,7 +39,9 @@ const Profile = () => {
     }
 
     if (user.isAdmin) {
-      payload.terms = formData.terms; // ✅ added
+      payload.terms = formData.terms;
+      payload.supportEmail = formData.supportEmail;
+      payload.supportWhatsapp = formData.supportWhatsapp;
     }
 
     await dispatch(
@@ -147,7 +151,7 @@ const Profile = () => {
 
               {user.isAdmin && (
                 <div>
-                  <label className="text-sm text-gray-500">Delivery Fee</label>
+                  <label className="text-sm text-gray-500">Delivery Fee (QAR)</label>
                   <input
                     type="number"
                     disabled={!isEditing}
@@ -158,6 +162,38 @@ const Profile = () => {
                         deliveryfee: Number(e.target.value),
                       })
                     }
+                    className="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
+                  />
+                </div>
+              )}
+
+              {user.isAdmin && (
+                <div>
+                  <label className="text-sm text-gray-500">Support Email</label>
+                  <input
+                    type="email"
+                    disabled={!isEditing}
+                    value={formData.supportEmail}
+                    onChange={(e) =>
+                      setFormData({ ...formData, supportEmail: e.target.value })
+                    }
+                    placeholder="support@yourdomain.com"
+                    className="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
+                  />
+                </div>
+              )}
+
+              {user.isAdmin && (
+                <div>
+                  <label className="text-sm text-gray-500">Support WhatsApp (with country code)</label>
+                  <input
+                    type="text"
+                    disabled={!isEditing}
+                    value={formData.supportWhatsapp}
+                    onChange={(e) =>
+                      setFormData({ ...formData, supportWhatsapp: e.target.value })
+                    }
+                    placeholder="+97412345678"
                     className="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-purple-500 disabled:bg-gray-100"
                   />
                 </div>
