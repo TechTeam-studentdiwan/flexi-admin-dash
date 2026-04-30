@@ -38,6 +38,7 @@ const Sidebar = () => {
     { name: "Products", path: "/products", icon: <FaBoxOpen /> },
     { name: "Category", path: "/category", icon: <TbCategory /> },
     { name: "Coupons", path: "/coupons", icon: <RiCoupon2Fill /> },
+    { name: "Assign Voucher", path: "/assign-voucher", icon: <RiDiscountPercentFill /> },
     { name: "Orders", path: "/orders", icon: <FaClipboardList /> },
     // { name: "Addresses", path: "/addresses", icon: <FaAddressBook /> },
     // { name: "Measurements", path: "/measurements", icon: <TbRulerMeasure /> },

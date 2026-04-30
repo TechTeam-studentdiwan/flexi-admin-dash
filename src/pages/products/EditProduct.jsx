@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
+
+const OCCASION_OPTIONS = ['Ramadan','Eid','Wedding','Festive','Casual','Party Wear','Formal','Office Wear','Luxurious','Other'];
 import Layout from "../../components/Layout";
 import { updateProduct } from "../../store/products/productThunks";
 import RichTextEditor from "../../components/AdminEditor";
@@ -22,9 +24,16 @@ const EditProduct = () => {
   const fitAdjustmentEnabled = watch("fitAdjustmentEnabled");
   const sizesValue = watch("sizes");
   const fabricVal = watch("fabric");
-  const occasionVal = watch("occasion");
 
   const [images, setImages] = useState([]);
+  const [selectedOccasions, setSelectedOccasions] = useState([]);
+  const [customOccasion, setCustomOccasion] = useState('');
+
+  const toggleOccasion = (occ) => {
+    setSelectedOccasions(prev =>
+      prev.includes(occ) ? prev.filter(o => o !== occ) : [...prev, occ]
+    );
+  };
 
   useEffect(() => {
     if (!product) {
@@ -50,6 +59,14 @@ const EditProduct = () => {
         isActive: product.isActive ?? true,
       });
 
+      if (product.occasion) {
+        const parts = product.occasion.split(',').map(s => s.trim()).filter(Boolean);
+        const known = parts.filter(o => OCCASION_OPTIONS.includes(o));
+        const custom = parts.filter(o => !OCCASION_OPTIONS.includes(o)).join(', ');
+        setSelectedOccasions(known);
+        setCustomOccasion(custom);
+      }
+
       if (product.images?.length) {
         setImages(
           product.images.map((url, index) => ({
@@ -67,6 +84,8 @@ const EditProduct = () => {
           setValue(`sizeChart.${index}.shoulder_max`, item.shoulder_max);
           setValue(`sizeChart.${index}.sleeve_length`, item.sleeve_length);
           setValue(`sizeChart.${index}.dress_length`, item.dress_length);
+          const stockVal = product.sizeStock ? (product.sizeStock[item.size] ?? 0) : 0;
+          setValue(`sizeStockValues.${index}`, stockVal);
         });
       }
     }
@@ -96,8 +115,6 @@ const EditProduct = () => {
     try {
       data.price = Number(data.price);
       data.discountPrice = Number(data.discountPrice);
-      data.stock = Number(data.stock);
-      data.estimatedDeliveryDays = Number(data.estimatedDeliveryDays);
 
       data.fitAdjustmentEnabled = Boolean(data.fitAdjustmentEnabled);
       data.fitAdjustmentFee = data.fitAdjustmentEnabled
@@ -109,8 +126,10 @@ const EditProduct = () => {
 
       if (data.fabric === "other" && data.customFabric?.trim()) data.fabric = data.customFabric.trim();
       delete data.customFabric;
-      if (data.occasion === "other" && data.customOccasion?.trim()) data.occasion = data.customOccasion.trim();
-      delete data.customOccasion;
+
+      const occasions = [...selectedOccasions];
+      if (customOccasion.trim()) occasions.push(customOccasion.trim());
+      data.occasion = occasions.join(', ');
 
       if (data.tags) {
         data.tags = data.tags
@@ -125,6 +144,17 @@ const EditProduct = () => {
         .filter(Boolean);
 
       data.sizes = sizesArray;
+
+      // Per-size stock → build sizeStock map and sum total stock
+      const sizeStock = {};
+      if (data.sizeStockValues) {
+        sizesArray.forEach((size, index) => {
+          sizeStock[size] = Number(data.sizeStockValues[index] || 0);
+        });
+      }
+      data.sizeStock = sizeStock;
+      data.stock = Object.values(sizeStock).reduce((sum, v) => sum + v, 0);
+      delete data.sizeStockValues;
 
       if (data.sizeChart) {
         data.sizeChart = sizesArray.map((size, index) => ({
@@ -192,16 +222,8 @@ const EditProduct = () => {
           />
 
           <input
-            type="number"
-            {...register("stock")}
-            placeholder="Stock"
-            className="w-full border p-2 rounded"
-          />
-
-          <input
-            type="number"
             {...register("estimatedDeliveryDays")}
-            placeholder="Estimated Delivery Days"
+            placeholder="Estimated Delivery e.g. 3-4 days"
             className="w-full border p-2 rounded"
           />
 
@@ -242,22 +264,34 @@ const EditProduct = () => {
             <input {...register("customFabric")} placeholder="Type custom fabric type..." className="w-full border p-2 rounded mt-1" />
           )}
 
-          <select {...register("occasion")} className="w-full border p-2 rounded">
-            <option value="">Select Occasion</option>
-            <option value="Ramadan">Ramadan</option>
-            <option value="Eid">Eid</option>
-            <option value="Wedding">Wedding</option>
-            <option value="Festive">Festive</option>
-            <option value="Casual">Casual</option>
-            <option value="Party Wear">Party Wear</option>
-            <option value="Formal">Formal</option>
-            <option value="Office Wear">Office Wear</option>
-            <option value="luxurious">Luxurious</option>
-            <option value="other">Other</option>
-          </select>
-          {occasionVal === "other" && (
-            <input {...register("customOccasion")} placeholder="Type custom occasion..." className="w-full border p-2 rounded mt-1" />
-          )}
+          <div className="border rounded-lg p-3">
+            <p className="text-sm font-medium text-gray-600 mb-2">Occasions <span className="text-gray-400 font-normal">(select multiple)</span></p>
+            <div className="flex flex-wrap gap-2">
+              {OCCASION_OPTIONS.map(occ => (
+                <button
+                  key={occ}
+                  type="button"
+                  onClick={() => toggleOccasion(occ)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium border transition ${
+                    selectedOccasions.includes(occ)
+                      ? 'bg-purple-600 text-white border-purple-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-purple-400'
+                  }`}
+                >
+                  {occ}
+                </button>
+              ))}
+            </div>
+            <input
+              value={customOccasion}
+              onChange={e => setCustomOccasion(e.target.value)}
+              placeholder="Add custom occasion..."
+              className="w-full border rounded p-2 mt-2 text-sm"
+            />
+            {selectedOccasions.length > 0 && (
+              <p className="text-xs text-purple-600 mt-1">Selected: {selectedOccasions.join(', ')}{customOccasion ? ', ' + customOccasion : ''}</p>
+            )}
+          </div>
 
           <input {...register("sizes")} className="w-full border p-2 rounded" />
 
@@ -269,7 +303,13 @@ const EditProduct = () => {
               .filter(Boolean)
               .map((size, index) => (
                 <div key={index} className="border p-3 rounded space-y-2">
-                  <h4>Size: {size}</h4>
+                  <h4 className="font-medium text-purple-700">Size: {size}</h4>
+                  <input
+                    type="number"
+                    placeholder={`Stock for ${size}`}
+                    {...register(`sizeStockValues.${index}`, { valueAsNumber: true })}
+                    className="border p-2 rounded w-full bg-purple-50"
+                  />
                   <div className="grid grid-cols-2 gap-3">
                     <input type="number" placeholder="Bust Max" {...register(`sizeChart.${index}.bust_max`, { valueAsNumber: true })} className="border p-2 rounded" />
                     <input type="number" placeholder="Waist Max" {...register(`sizeChart.${index}.waist_max`, { valueAsNumber: true })} className="border p-2 rounded" />

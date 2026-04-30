@@ -18,6 +18,24 @@ const Orders = () => {
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState(new Set());
+
+  const toggleSelect = (e, id) => {
+    e.stopPropagation();
+    setSelectedOrderIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedOrderIds.size === orders.length) {
+      setSelectedOrderIds(new Set());
+    } else {
+      setSelectedOrderIds(new Set(orders.map(o => o._id)));
+    }
+  };
 
   const [filters, setFilters] = useState({
     page: 1,
@@ -68,200 +86,224 @@ const Orders = () => {
       .catch((err) => console.error("QR error", err));
   }, [selectedOrder]);
 
-  const printOrderSticker = useCallback(async () => {
-    if (!selectedOrder) return;
+  const buildInvoiceHTML = useCallback(async (order) => {
+    const addr = order.shippingAddress || {};
+    const trackingUrl = `${TRACKING_BASE}/${order.orderNumber}`;
 
-    const addr = selectedOrder.shippingAddress || {};
-    const trackingUrl = `${TRACKING_BASE}/${selectedOrder.orderNumber}`;
-
-    // Build address string for Qatar format
     const addrParts = addr.addressType === "villa"
       ? [`Villa ${addr.villaNo}`, `Street ${addr.streetNo}`, `Zone ${addr.zoneNo}`]
       : [`Building ${addr.buildingNo}`, `Floor ${addr.floorNo}`, `Room ${addr.roomNo}`, `Street ${addr.streetNo}`, `Zone ${addr.zoneNo}`];
     const addrLine = [...addrParts, addr.city, addr.country].filter(Boolean).join(", ");
 
-    // Generate high-res QR for print
-    let printQr = qrDataUrl;
+    let printQr = "";
     try {
       printQr = await QRCode.toDataURL(trackingUrl, {
-        width: 300,
-        margin: 1,
-        color: { dark: "#471755", light: "#ffffff" },
+        width: 200, margin: 1,
+        color: { dark: "#000000", light: "#ffffff" },
         errorCorrectionLevel: "H",
       });
     } catch (_) {}
 
-    // Build barcode SVG string
-    const barcodeVal = String(selectedOrder.orderNumber || selectedOrder._id.slice(-10));
     const barcodeSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     try {
-      JsBarcode(barcodeSvg, barcodeVal, {
-        format: "CODE128", width: 2.2, height: 60,
-        displayValue: true, fontSize: 13, margin: 4,
+      JsBarcode(barcodeSvg, String(order.orderNumber || order._id.slice(-10)), {
+        format: "CODE128", width: 2, height: 50,
+        displayValue: true, fontSize: 11, margin: 4,
         background: "#ffffff", lineColor: "#000",
         xmlDocument: document,
       });
     } catch (_) {}
 
-    const itemsHTML = (selectedOrder.items || []).map((item) => `
+    const itemsHTML = (order.items || []).map((item) => `
       <tr>
-        <td class="item-name">${item.name}<span class="item-size"> — ${item.size}</span></td>
-        <td class="item-qty">×${item.quantity}</td>
-        <td class="item-price">QAR ${(item.discountPrice || item.price).toFixed(2)}</td>
+        <td style="padding:7px 6px;vertical-align:middle">
+          ${item.image ? `<img src="${item.image}" style="width:38px;height:38px;object-fit:cover;border:1px solid #ddd;border-radius:3px;display:block"/>` : `<div style="width:38px;height:38px;background:#f3f4f6;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#999"></div>`}
+        </td>
+        <td style="padding:7px 6px;vertical-align:middle">
+          <div style="font-size:10px;font-weight:700;color:#111">${item.name || ""}</div>
+          <div style="font-size:8px;color:#777;margin-top:2px">Size: ${item.size || "—"}</div>
+        </td>
+        <td style="padding:7px 6px;text-align:center;vertical-align:middle;font-size:10px;color:#444">×${item.quantity}</td>
+        <td style="padding:7px 6px;text-align:right;vertical-align:middle;font-size:10px;font-weight:700;color:#000">QAR ${Number(item.discountPrice || item.price || 0).toFixed(2)}</td>
       </tr>`).join("");
 
-    const estimatedStr = selectedOrder.estimatedDelivery
-      ? new Date(selectedOrder.estimatedDelivery).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+    const orderDate = new Date(order.createdAt || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    const estStr = order.estimatedDelivery
+      ? new Date(order.estimatedDelivery).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
       : "—";
+    const statusLabel = (order.orderStatus || "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    const paymentLabel = (order.paymentType || "online").replace(/\b\w/g, c => c.toUpperCase());
 
-    const statusColors = {
-      pending: "#F59E0B", confirmed: "#10B981", processing: "#3B82F6",
-      shipped: "#0EA5E9", delivered: "#059669", cancelled: "#EF4444",
-    };
-    const sc = statusColors[selectedOrder.orderStatus] || "#6B7280";
-    const statusLabel = (selectedOrder.orderStatus || "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    return `
+  <div class="invoice">
+    <!-- HEADER -->
+    <div class="inv-header">
+      <div class="brand">
+        <div class="brand-name">SAHIBA</div>
+        <div class="brand-sub">Ethnic &amp; Traditional Wear · Doha, Qatar</div>
+      </div>
+      <div class="order-block">
+        <div class="order-id">ORDER #${order.orderNumber || order._id.slice(-8)}</div>
+        <div class="order-meta">${orderDate}</div>
+        <div class="status-badge">${statusLabel}</div>
+      </div>
+    </div>
+
+    <!-- SHIP TO + CODES -->
+    <div class="ship-row">
+      <div class="ship-details">
+        <div class="section-label">SHIP TO</div>
+        <div style="font-size:14px;font-weight:800;color:#000;margin-bottom:3px">${addr.fullName || ""}</div>
+        <div style="font-size:10px;color:#333;margin-bottom:3px">${addr.phone || ""}</div>
+        <div style="font-size:9px;color:#555;line-height:1.5">${addrLine}</div>
+      </div>
+      <div class="codes-col">
+        ${printQr ? `<img src="${printQr}" style="width:76px;height:76px;border:1px solid #ddd;border-radius:4px;display:block"/>
+        <div style="font-size:7px;color:#777;text-align:center;margin-top:3px;text-transform:uppercase;letter-spacing:.5px">Scan to Track</div>` : ""}
+      </div>
+    </div>
+
+    <!-- BARCODE -->
+    <div style="text-align:center;margin:8px 0 10px">${barcodeSvg.outerHTML}</div>
+
+    <div class="divider"></div>
+
+    <!-- ITEMS TABLE -->
+    <div class="section-label" style="margin-bottom:4px">ITEMS</div>
+    <table>
+      <thead>
+        <tr style="border-bottom:2px solid #000">
+          <th style="padding:5px 6px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.5px;width:44px"></th>
+          <th style="padding:5px 6px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.5px">Product</th>
+          <th style="padding:5px 6px;text-align:center;font-size:8px;text-transform:uppercase;letter-spacing:.5px">Qty</th>
+          <th style="padding:5px 6px;text-align:right;font-size:8px;text-transform:uppercase;letter-spacing:.5px">Price</th>
+        </tr>
+      </thead>
+      <tbody>${itemsHTML}</tbody>
+    </table>
+
+    <div class="divider" style="margin-top:8px"></div>
+
+    <!-- TOTALS -->
+    <div class="totals">
+      ${Number(order.discount) > 0 ? `<div class="total-row"><span>Discount${order.couponCode ? ` (${order.couponCode})` : ""}</span><span style="color:#16a34a">−QAR ${Number(order.discount).toFixed(2)}</span></div>` : ""}
+      <div class="total-row"><span>Delivery</span><span>${order.deliveryFee === 0 ? "FREE" : `QAR ${Number(order.deliveryFee || 0).toFixed(2)}`}</span></div>
+      <div class="total-row"><span>Payment</span><span>${paymentLabel} · ${(order.paymentStatus || "").toUpperCase()}</span></div>
+      <div class="total-row"><span>Est. Delivery</span><span>${estStr}</span></div>
+      <div class="total-final"><span>TOTAL</span><span>QAR ${Number(order.total || 0).toFixed(2)}</span></div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="inv-footer">Thank you for shopping with Sahiba Wears &nbsp;·&nbsp; support@sahibawears.com</div>
+  </div>`;
+  }, [qrDataUrl]);
+
+  const printOrderSticker = useCallback(async () => {
+    if (!selectedOrder) return;
+    const invoiceBody = await buildInvoiceHTML(selectedOrder);
 
     const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>Parcel Sticker — #${selectedOrder.orderNumber}</title>
+<title>Invoice — #${selectedOrder.orderNumber}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Inter',Arial,sans-serif;background:#fff;width:100mm;margin:0 auto}
+  body{font-family:Arial,sans-serif;background:#fff;padding:0}
   @media print{
-    @page{size:100mm 150mm;margin:0}
-    body{width:100mm;height:150mm;overflow:hidden}
+    @page{size:A5;margin:12mm}
     .no-print{display:none!important}
+    body{padding:0}
   }
-
-  /* ── Header ── */
-  .header{background:linear-gradient(135deg,#471755 0%,#7c3aed 100%);padding:10px 12px 8px;color:#fff;text-align:center}
-  .store-name{font-size:18px;font-weight:800;letter-spacing:.5px}
-  .store-sub{font-size:8px;opacity:.75;letter-spacing:.3px;margin-top:1px}
-  .order-num{font-size:20px;font-weight:800;margin-top:5px;letter-spacing:1px}
-  .status-pill{display:inline-block;margin-top:5px;padding:3px 10px;border-radius:12px;font-size:9px;font-weight:700;letter-spacing:.4px;border:1.5px solid}
-
-  /* ── Body ── */
-  .body{padding:8px 10px}
-
-  /* ── QR + Barcode row ── */
-  .codes-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .qr-wrap{flex-shrink:0;text-align:center}
-  .qr-wrap img{width:72px;height:72px;display:block;border:2px solid #e9d5ff;border-radius:6px;padding:2px}
-  .qr-label{font-size:7px;color:#7c3aed;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.3px;text-align:center}
-  .barcode-wrap{flex:1;text-align:center;overflow:hidden}
-  .barcode-wrap svg{max-width:100%;height:52px}
-
-  /* ── Divider ── */
-  .dashed{border-top:1px dashed #d1d5db;margin:6px 0}
-
-  /* ── Address ── */
-  .section-label{font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;margin-bottom:3px}
-  .cust-name{font-size:13px;font-weight:800;color:#111}
-  .cust-phone{font-size:10px;color:#555;margin-top:1px}
-  .cust-addr{font-size:9px;color:#555;margin-top:2px;line-height:1.4}
-
-  /* ── Items table ── */
-  table{width:100%;border-collapse:collapse;font-size:9px}
-  .item-name{color:#111;font-weight:600;padding:3px 0}
-  .item-size{color:#777;font-weight:400}
-  .item-qty{color:#555;text-align:center;padding:3px 4px}
-  .item-price{text-align:right;color:#471755;font-weight:700;padding:3px 0}
-
-  /* ── Summary ── */
-  .sum-row{display:flex;justify-content:space-between;font-size:9px;color:#555;margin:2px 0}
-  .sum-total{display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:#471755;margin-top:4px;padding-top:4px;border-top:2px solid #471755}
-
-  /* ── Footer ── */
-  .footer{text-align:center;padding:5px 10px 8px;font-size:7.5px;color:#9ca3af;line-height:1.4}
-  .footer strong{color:#471755}
-
-  /* ── Print button (screen only) ── */
-  .print-btn{display:block;width:100%;padding:10px;background:#471755;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;border-radius:6px}
-  .print-btn:hover{background:#7c3aed}
+  .invoice{max-width:148mm;margin:0 auto;padding:16px}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #000;padding-bottom:12px;margin-bottom:14px}
+  .brand-name{font-size:22px;font-weight:900;letter-spacing:-0.5px;color:#000}
+  .brand-sub{font-size:8px;color:#666;letter-spacing:.3px;margin-top:2px}
+  .order-block{text-align:right}
+  .order-id{font-size:15px;font-weight:800;color:#000}
+  .order-meta{font-size:9px;color:#777;margin-top:2px}
+  .status-badge{display:inline-block;border:1.5px solid #000;border-radius:3px;padding:2px 8px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:5px}
+  .ship-row{display:flex;gap:14px;margin-bottom:10px}
+  .ship-details{flex:1}
+  .codes-col{flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+  .section-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:5px}
+  .divider{border-top:1px solid #ddd;margin:8px 0}
+  table{width:100%;border-collapse:collapse}
+  .totals{margin-top:8px}
+  .total-row{display:flex;justify-content:space-between;font-size:9.5px;color:#555;padding:2px 0}
+  .total-final{display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#000;border-top:2.5px solid #000;margin-top:6px;padding-top:6px}
+  .inv-footer{text-align:center;font-size:8px;color:#999;border-top:1px dashed #ccc;margin-top:14px;padding-top:8px}
+  .print-btn{display:block;width:100%;padding:12px;background:#000;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;border-radius:6px;letter-spacing:.5px}
+  .print-btn:hover{background:#333}
 </style>
 </head>
 <body>
-
-  <!-- HEADER -->
-  <div class="header">
-    <div class="store-name">Sahiba Wears</div>
-    <div class="store-sub">Ethnic &amp; Traditional Wear · Doha, Qatar</div>
-    <div class="order-num">#${selectedOrder.orderNumber}</div>
-    <div class="status-pill" style="background:${sc}22;color:${sc};border-color:${sc}88">${statusLabel}</div>
-  </div>
-
-  <!-- BODY -->
-  <div class="body">
-
-    <!-- QR + Barcode -->
-    <div class="codes-row">
-      <div class="qr-wrap">
-        <img src="${printQr}" alt="QR"/>
-        <div class="qr-label">Scan to Track</div>
-      </div>
-      <div class="barcode-wrap">
-        ${barcodeSvg.outerHTML}
-      </div>
-    </div>
-
-    <div class="dashed"></div>
-
-    <!-- Address -->
-    <div style="margin-bottom:6px">
-      <div class="section-label">Ship To</div>
-      <div class="cust-name">${addr.fullName || ""}</div>
-      <div class="cust-phone">📞 ${addr.phone || ""}</div>
-      <div class="cust-addr">${addrLine}</div>
-    </div>
-
-    <div class="dashed"></div>
-
-    <!-- Items -->
-    <div style="margin-bottom:5px">
-      <div class="section-label">Items</div>
-      <table>
-        <tbody>${itemsHTML}</tbody>
-      </table>
-    </div>
-
-    <div class="dashed"></div>
-
-    <!-- Payment Summary -->
-    ${selectedOrder.discount > 0 ? `<div class="sum-row"><span>Discount${selectedOrder.couponCode ? ` (${selectedOrder.couponCode})` : ""}</span><span style="color:#10b981">−QAR ${Number(selectedOrder.discount).toFixed(2)}</span></div>` : ""}
-    <div class="sum-row"><span>Delivery</span><span>${selectedOrder.deliveryFee === 0 ? "FREE" : `QAR ${Number(selectedOrder.deliveryFee).toFixed(2)}`}</span></div>
-    <div class="sum-total"><span>Total</span><span>QAR ${Number(selectedOrder.total).toFixed(2)}</span></div>
-
-    <div class="sum-row" style="margin-top:4px">
-      <span>Payment</span>
-      <span style="font-weight:600;color:#111">${(selectedOrder.paymentType || "").replace(/\b\w/g,c=>c.toUpperCase())} · ${(selectedOrder.paymentStatus || "").toUpperCase()}</span>
-    </div>
-    <div class="sum-row">
-      <span>Est. Delivery</span>
-      <span style="font-weight:600;color:#111">${estimatedStr}</span>
-    </div>
-
-  </div>
-
-  <!-- FOOTER -->
-  <div class="footer">
-    <strong>Thank you for shopping with Sahiba Wears ✨</strong><br/>
-    ${new Date(selectedOrder.createdAt || Date.now()).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} · support@flexii.com
-  </div>
-
-  <button class="print-btn no-print" onclick="window.print()">🖨️ Print Sticker</button>
-
+  ${invoiceBody}
+  <button class="print-btn no-print" onclick="window.print()">Print Invoice</button>
 </body>
 </html>`;
 
-    const win = window.open("", "_blank", "width=440,height=680");
+    const win = window.open("", "_blank", "width=600,height=820");
     if (!win) return;
     win.document.write(html);
     win.document.close();
     win.focus();
-  }, [selectedOrder, qrDataUrl]);
+  }, [selectedOrder, buildInvoiceHTML]);
+
+  const printBulkOrders = useCallback(async () => {
+    const toPrint = orders.filter(o => selectedOrderIds.has(o._id));
+    if (!toPrint.length) return;
+
+    const invoiceBodies = await Promise.all(toPrint.map(o => buildInvoiceHTML(o)));
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Bulk Invoices — Sahiba Wears</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;background:#fff}
+  @media print{
+    @page{size:A5;margin:12mm}
+    .no-print{display:none!important}
+    .invoice{page-break-after:always}
+    .invoice:last-child{page-break-after:auto}
+  }
+  .invoice{max-width:148mm;margin:0 auto;padding:16px;border-bottom:2px dashed #ccc}
+  @media print{.invoice{border-bottom:none}}
+  .inv-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2.5px solid #000;padding-bottom:12px;margin-bottom:14px}
+  .brand-name{font-size:22px;font-weight:900;letter-spacing:-0.5px;color:#000}
+  .brand-sub{font-size:8px;color:#666;letter-spacing:.3px;margin-top:2px}
+  .order-block{text-align:right}
+  .order-id{font-size:15px;font-weight:800;color:#000}
+  .order-meta{font-size:9px;color:#777;margin-top:2px}
+  .status-badge{display:inline-block;border:1.5px solid #000;border-radius:3px;padding:2px 8px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:5px}
+  .ship-row{display:flex;gap:14px;margin-bottom:10px}
+  .ship-details{flex:1}
+  .codes-col{flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+  .section-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:5px}
+  .divider{border-top:1px solid #ddd;margin:8px 0}
+  table{width:100%;border-collapse:collapse}
+  .totals{margin-top:8px}
+  .total-row{display:flex;justify-content:space-between;font-size:9.5px;color:#555;padding:2px 0}
+  .total-final{display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:#000;border-top:2.5px solid #000;margin-top:6px;padding-top:6px}
+  .inv-footer{text-align:center;font-size:8px;color:#999;border-top:1px dashed #ccc;margin-top:14px;padding-top:8px}
+  .print-btn{display:block;width:100%;padding:12px;background:#000;color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;margin:20px auto;max-width:320px;border-radius:6px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+  ${invoiceBodies.join("\n")}
+  <button class="print-btn no-print" onclick="window.print()">Print All ${toPrint.length} Invoices</button>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank", "width=660,height=860");
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+  }, [orders, selectedOrderIds, buildInvoiceHTML]);
 
   useEffect(() => {
     dispatch(getAllOrders(filters));
@@ -310,6 +352,24 @@ const Orders = () => {
           Orders Management
         </h2>
 
+        {selectedOrderIds.size > 0 && (
+          <div className="flex items-center gap-3 mb-3 bg-purple-50 border border-purple-200 rounded-lg px-4 py-2">
+            <span className="text-sm text-purple-700 font-medium">{selectedOrderIds.size} order{selectedOrderIds.size > 1 ? "s" : ""} selected</span>
+            <button
+              onClick={printBulkOrders}
+              className="ml-auto bg-black text-white text-sm px-4 py-1.5 rounded-lg font-semibold hover:bg-gray-800 transition"
+            >
+              Print Selected ({selectedOrderIds.size})
+            </button>
+            <button
+              onClick={() => setSelectedOrderIds(new Set())}
+              className="text-sm text-gray-500 hover:text-gray-700 transition"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+
         <div className="bg-white shadow rounded-lg overflow-hidden">
           {loading ? (
             <div className="p-6 text-center">
@@ -319,14 +379,20 @@ const Orders = () => {
             <table className="w-full border-collapse">
               <thead className="bg-gray-100 text-left">
                 <tr>
+                  <th className="p-4">
+                    <input
+                      type="checkbox"
+                      checked={orders.length > 0 && selectedOrderIds.size === orders.length}
+                      onChange={toggleSelectAll}
+                      className="cursor-pointer"
+                    />
+                  </th>
                   <th className="p-4 text-sm font-semibold">Order #</th>
                   <th className="p-4 text-sm font-semibold">Customer</th>
                   <th className="p-4 text-sm font-semibold">Total</th>
                   <th className="p-4 text-sm font-semibold">Order Status</th>
                   <th className="p-4 text-sm font-semibold">Payment</th>
-                  <th className="p-4 text-sm font-semibold">
-                    Estimated Delivery
-                  </th>
+                  <th className="p-4 text-sm font-semibold">Date</th>
                 </tr>
               </thead>
 
@@ -337,6 +403,15 @@ const Orders = () => {
                     onClick={() => openDetails(order)}
                     className="border-t hover:bg-gray-50 cursor-pointer transition"
                   >
+                    <td className="p-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedOrderIds.has(order._id)}
+                        onChange={(e) => toggleSelect(e, order._id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="cursor-pointer"
+                      />
+                    </td>
                     <td className="p-4 font-mono text-xs text-gray-600">
                       #{order.orderNumber || order._id.slice(-8)}
                     </td>
@@ -347,22 +422,25 @@ const Orders = () => {
                       </div>
                     </td>
 
-                    <td className="p-4">{order.total}</td>
+                    <td className="p-4 font-semibold">QAR {order.total}</td>
 
                     <td className="p-4">
-                      <span className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700">
+                      <span className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-700 capitalize">
                         {order.orderStatus}
                       </span>
                     </td>
 
                     <td className="p-4">
-                      <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">
-                        {order.paymentStatus}
-                      </span>
+                      <div>
+                        <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 capitalize">
+                          {order.paymentStatus}
+                        </span>
+                        <div className="text-xs text-gray-500 mt-1 capitalize">{order.paymentType || "online"}</div>
+                      </div>
                     </td>
 
-                    <td className="p-4 text-sm text-gray-500">
-                      {new Date(order.estimatedDelivery).toLocaleDateString()}
+                    <td className="p-4 text-xs text-gray-500">
+                      {order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
                     </td>
                   </tr>
                 ))}
@@ -594,11 +672,15 @@ const Orders = () => {
 
               <div className="space-y-3">
                 {selectedOrder.items.map((item, index) => (
-                  <div key={index} className="border p-3 rounded bg-gray-50">
-                    <div className="font-medium">{item.name}</div>
-                    <div>Size: {item.size}</div>
-                    <div>Qty: {item.quantity}</div>
-                    <div>Price: {item.discountPrice || item.price}</div>
+                  <div key={index} className="border p-3 rounded bg-gray-50 flex gap-3">
+                    {item.image && (
+                      <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded border flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm truncate">{item.name}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">Size: {item.size} · Qty: {item.quantity}</div>
+                      <div className="text-sm font-bold text-purple-700 mt-1">QAR {Number(item.discountPrice || item.price || 0).toFixed(2)}</div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -607,18 +689,17 @@ const Orders = () => {
 
               <h3 className="font-semibold text-purple-700">Payment Summary</h3>
 
-              <div>Subtotal: {selectedOrder.subtotal}</div>
-              <div>Discount: {selectedOrder.discount}</div>
-              <div>Delivery Fee: {selectedOrder.deliveryFee}</div>
-              <div className="font-bold text-lg">
-                Total: {selectedOrder.total}
-              </div>
-
-              {selectedOrder.couponCode && (
-                <div>
-                  <strong>Coupon:</strong> {selectedOrder.couponCode}
+              <div className="bg-gray-50 rounded-lg p-3 space-y-1.5 text-sm">
+                <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>QAR {selectedOrder.subtotal}</span></div>
+                {Number(selectedOrder.discount) > 0 && (
+                  <div className="flex justify-between"><span className="text-gray-500">Discount{selectedOrder.couponCode ? ` (${selectedOrder.couponCode})` : ""}</span><span className="text-green-600">−QAR {selectedOrder.discount}</span></div>
+                )}
+                <div className="flex justify-between"><span className="text-gray-500">Delivery</span><span>{selectedOrder.deliveryFee === 0 ? "FREE" : `QAR ${selectedOrder.deliveryFee}`}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Payment Type</span><span className="capitalize font-medium">{selectedOrder.paymentType || "online"}</span></div>
+                <div className="flex justify-between border-t pt-1.5 font-bold text-base">
+                  <span>Total</span><span className="text-purple-700">QAR {selectedOrder.total}</span>
                 </div>
-              )}
+              </div>
             </div>
           </SideDrawer>
         )}

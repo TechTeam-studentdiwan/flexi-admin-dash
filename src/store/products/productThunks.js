@@ -7,6 +7,7 @@ export const getProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(`${BACKEND_URL}/products/get-products`, {
+        params: { adminView: "true", limit: 200 },
         withCredentials: true,
       });
       return res.data;

@@ -69,6 +69,40 @@ export const deleteCoupon = createAsyncThunk(
   }
 );
 
+// GET all assigned vouchers (admin)
+export const getAssignedVouchers = createAsyncThunk(
+  "coupon/getAssignedVouchers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/coupons/assigned-all`, {
+        withCredentials: true,
+      });
+      return res.data.vouchers;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch assigned vouchers"
+      );
+    }
+  }
+);
+
+// ASSIGN personal voucher to a user
+export const assignVoucher = createAsyncThunk(
+  "coupon/assignVoucher",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(`${BACKEND_URL}/coupons/assign`, data, {
+        withCredentials: true,
+      });
+      return res.data.voucher;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Assign failed"
+      );
+    }
+  }
+);
+
 // VALIDATE
 export const validateCoupon = createAsyncThunk(
   "coupon/validateCoupon",

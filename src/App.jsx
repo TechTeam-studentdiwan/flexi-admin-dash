@@ -18,6 +18,7 @@ import EditCategory from "./pages/category/EditCategory";
 import EditProduct from "./pages/products/EditProduct";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EditCoupon from "./pages/coupons/EditCoupon";
+import AssignVoucher from "./pages/coupons/AssignVoucher";
 import CustomerDetails from "./pages/customers/CustomerDetails";
 import Offers from "./pages/offers/Offers";
 import AddEditOffer from "./pages/offers/AddEditOffer";
@@ -136,6 +137,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <EditCoupon />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assign-voucher"
+            element={
+              <ProtectedRoute>
+                <AssignVoucher />
               </ProtectedRoute>
             }
           />

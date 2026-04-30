@@ -8,6 +8,8 @@ import RichTextEditor from "../../components/AdminEditor";
 import UploadCard from "../../components/UploadCard";
 import { usePopup } from "../../components/PopupMessage/PopupContext";
 
+const OCCASION_OPTIONS = ['Ramadan','Eid','Wedding','Festive','Casual','Party Wear','Formal','Office Wear','Luxurious','Other'];
+
 const AddProducts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -18,7 +20,15 @@ const AddProducts = () => {
   const fitAdjustmentEnabled = watch("fitAdjustmentEnabled");
   const sizesValue = watch("sizes");
   const fabricVal = watch("fabric");
-  const occasionVal = watch("occasion");
+
+  const [selectedOccasions, setSelectedOccasions] = useState([]);
+  const [customOccasion, setCustomOccasion] = useState('');
+
+  const toggleOccasion = (occ) => {
+    setSelectedOccasions(prev =>
+      prev.includes(occ) ? prev.filter(o => o !== occ) : [...prev, occ]
+    );
+  };
 
   const [images, setImages] = useState([]);
 
@@ -46,8 +56,6 @@ const AddProducts = () => {
     try {
       data.price = Number(data.price);
       data.discountPrice = Number(data.discountPrice);
-      data.stock = Number(data.stock);
-      data.estimatedDeliveryDays = Number(data.estimatedDeliveryDays);
 
       data.fitAdjustmentEnabled = Boolean(data.fitAdjustmentEnabled);
       data.fitAdjustmentFee = data.fitAdjustmentEnabled
@@ -59,8 +67,11 @@ const AddProducts = () => {
 
       if (data.fabric === "other" && data.customFabric?.trim()) data.fabric = data.customFabric.trim();
       delete data.customFabric;
-      if (data.occasion === "other" && data.customOccasion?.trim()) data.occasion = data.customOccasion.trim();
-      delete data.customOccasion;
+
+      // Multi-occasion: join tags; append custom if provided
+      const occasions = [...selectedOccasions];
+      if (customOccasion.trim()) occasions.push(customOccasion.trim());
+      data.occasion = occasions.join(', ');
 
       if (data.tags) {
         data.tags = data.tags
@@ -74,6 +85,17 @@ const AddProducts = () => {
         : [];
 
       data.sizes = sizesArray;
+
+      // Per-size stock → build sizeStock map and sum total stock
+      const sizeStock = {};
+      if (data.sizeStockValues) {
+        sizesArray.forEach((size, index) => {
+          sizeStock[size] = Number(data.sizeStockValues[index] || 0);
+        });
+      }
+      data.sizeStock = sizeStock;
+      data.stock = Object.values(sizeStock).reduce((sum, v) => sum + v, 0);
+      delete data.sizeStockValues;
 
       if (data.sizeChart) {
         data.sizeChart = sizesArray.map((size, index) => ({
@@ -97,6 +119,8 @@ const AddProducts = () => {
 
       reset();
       setImages([]);
+      setSelectedOccasions([]);
+      setCustomOccasion('');
       navigate("/products");
     } catch (err) {
       popMessage("Something went wrong");
@@ -155,8 +179,7 @@ const AddProducts = () => {
 
           <input type="number" {...register("price")} placeholder="Price" className="w-full border p-2 rounded" />
           <input type="number" {...register("discountPrice")} placeholder="Discount Price" className="w-full border p-2 rounded" />
-          <input type="number" {...register("stock")} placeholder="Stock Quantity" className="w-full border p-2 rounded" />
-          <input type="number" {...register("estimatedDeliveryDays")} placeholder="Estimated Delivery (Days)" className="w-full border p-2 rounded" />
+          <input {...register("estimatedDeliveryDays")} placeholder="Estimated Delivery e.g. 3-4 days" className="w-full border p-2 rounded" />
 
           <input {...register("tags")} placeholder="Tags (comma separated)" className="w-full border p-2 rounded" />
 
@@ -183,28 +206,46 @@ const AddProducts = () => {
             <input {...register("customFabric")} placeholder="Type custom fabric type..." className="w-full border p-2 rounded mt-1" />
           )}
 
-          <select {...register("occasion")} className="w-full border p-2 rounded">
-            <option value="">Select Occasion</option>
-            <option value="Ramadan">Ramadan</option>
-            <option value="Eid">Eid</option>
-            <option value="Wedding">Wedding</option>
-            <option value="Festive">Festive</option>
-            <option value="Casual">Casual</option>
-            <option value="Party Wear">Party Wear</option>
-            <option value="Formal">Formal</option>
-            <option value="Office Wear">Office Wear</option>
-            <option value="luxurious">Luxurious</option>
-            <option value="other">Other</option>
-          </select>
-          {occasionVal === "other" && (
-            <input {...register("customOccasion")} placeholder="Type custom occasion..." className="w-full border p-2 rounded mt-1" />
-          )}
+          <div className="border rounded-lg p-3">
+            <p className="text-sm font-medium text-gray-600 mb-2">Occasions <span className="text-gray-400 font-normal">(select multiple)</span></p>
+            <div className="flex flex-wrap gap-2">
+              {OCCASION_OPTIONS.map(occ => (
+                <button
+                  key={occ}
+                  type="button"
+                  onClick={() => toggleOccasion(occ)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium border transition ${
+                    selectedOccasions.includes(occ)
+                      ? 'bg-purple-600 text-white border-purple-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-purple-400'
+                  }`}
+                >
+                  {occ}
+                </button>
+              ))}
+            </div>
+            <input
+              value={customOccasion}
+              onChange={e => setCustomOccasion(e.target.value)}
+              placeholder="Add custom occasion..."
+              className="w-full border rounded p-2 mt-2 text-sm"
+            />
+            {selectedOccasions.length > 0 && (
+              <p className="text-xs text-purple-600 mt-1">Selected: {selectedOccasions.join(', ')}{customOccasion ? ', ' + customOccasion : ''}</p>
+            )}
+          </div>
 
           <input {...register("sizes")} placeholder="S, M, L" className="w-full border p-2 rounded" />
 
           {sizesValue && sizesValue.split(",").map((size, index) => (
             <div key={index} className="border p-3 rounded bg-white space-y-2">
               <h4 className="font-medium text-purple-700">Size: {size.trim()}</h4>
+              <input
+                type="number"
+                placeholder={`Stock for ${size.trim()}`}
+                {...register(`sizeStockValues.${index}`, { valueAsNumber: true })}
+                className="border p-2 rounded w-full bg-purple-50"
+              />
               <div className="grid grid-cols-2 gap-3">
                 <input type="number" placeholder="Bust Max" {...register(`sizeChart.${index}.bust_max`, { valueAsNumber: true })} className="border p-2 rounded" />
                 <input type="number" placeholder="Waist Max" {...register(`sizeChart.${index}.waist_max`, { valueAsNumber: true })} className="border p-2 rounded" />
